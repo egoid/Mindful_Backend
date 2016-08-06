@@ -1,0 +1,18 @@
+{
+  "db": {
+    "host": "localhost",
+    "user": "yobs",
+    "password": "",
+    "database": "yobs",
+    "port": "5432"
+  },
+  "aws": {
+    "accessKeyId": "",
+    "secretAccessKey": "",
+    "region": ""
+  },
+  "cloudfront_signing": {
+    "keypair_id": "",
+    "private_key": ""
+  }
+}
