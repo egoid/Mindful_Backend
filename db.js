@@ -4,7 +4,7 @@ var pg = require('pg');
 
 var config = require('./config.json');
 
-var db_config = config.db;
+var db_config = config.pg_db;
 db_config.multipleStatements = true;
 db_config.timezone = 'UTC';
 db_config.debug = false;
