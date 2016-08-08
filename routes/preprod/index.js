@@ -1,7 +1,7 @@
 const express = require('express');
 const router = new express.Router();
-const raw_jobs = require('./raw_jobs.js');
+const raw_job = require('./raw_job.js');
 
 exports.router = router;
 
-router.use(raw_jobs.router);
+router.use(raw_job.router);
