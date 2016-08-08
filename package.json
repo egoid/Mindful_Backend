@@ -22,6 +22,7 @@
     "mime": "*",
     "moment-timezone": "*",
     "morgan": "*",
+    "mysql": "*",
     "node-config-sets": "*",
     "pg": "^6.0.3",
     "sentiment": "1.0.6",

@@ -15,7 +15,7 @@ exports.router = router;
 
 const SINGLE_JOB_URL = '/1/job/:job_id';
 
-router.get('/1/jobs', session.requireValidSession, get_jobs);
+router.get('/1/jobs', get_jobs);
 router.post('/1/job', create_job);
 router.put(SINGLE_JOB_URL, update_job);
 router.delete(SINGLE_JOB_URL, delete_job);
