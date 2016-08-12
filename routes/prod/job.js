@@ -6,7 +6,7 @@ const express = require('express');
 const ejs = require('ejs');
 const config = require('node-config-sets');
 
-const db = require('../../db.js');
+const db = require('../../mysql_db.js');
 const session = require('../../session.js');
 const util = require('../../util.js');
 
@@ -36,8 +36,10 @@ function _extract_job_def(req) {
 }
 function _create_company(company_def, all_done) {
   if(company_def.id) {
+    console.log('All done in _create_company');
     all_done(null, company_def.id);
   } else {
+    console.log('Creating a company in _create_company');
     let industry_id;
     async.series([
       (done) => {
@@ -76,24 +78,50 @@ function _create_job_role(role_def, done) {
   if(role_def.id) {
     done(null, role_def.id);
   } else {
+    const insert_query = "INSERT INTO job_role (job_role_name, job_role_descr) VALUES ($1, $2)";
+    const values = [role_def.name, role_def.type];
 
+    db.queryWithArgMapFromPool(insert_query, values, (error, results) => {
+      let role_id;
+      if(error) {
+        util.errorLog("_create_job_role SQL error: " + error);
+      } else {
+        role_id = results.insertId;
+      }
+      done(error, role_id);
+    });
   }
 }
 function _create_job_type(type_def, done) {
   if(type_def.id) {
     done(null, type_def.id);
   } else {
+    const insert_query = "INSERT INTO job_type (job_type_name, job_type_descr) VALUES ($1, $2)";
+    const values = [type_def.name, type_def.type];
 
+    db.queryWithArgMapFromPool(insert_query, values, (error, results) => {
+      let type_id;
+      if(error) {
+        util.errorLog("_create_job_type SQL error: " + error);
+      } else {
+        type_id = results.insertId;
+      }
+      done(error, type_id);
+    });
   }
 }
 function _create_industry(industry_def, done) {
   if(industry_def.id) {
     done(null, industry_def.id);
   } else {
+    console.log('Creating an industry');
+
     const insert_query = "INSERT INTO industry (industry_name, industry_type) VALUES ($1, $2)";
     const values = [industry_def.name, industry_def.type];
 
     db.queryWithArgMapFromPool(insert_query, values, (error, results) => {
+      console.log('Done with create query', error, results);
+
       let industry_id;
       if(error) {
         util.errorLog("_create_company SQL error: " + error);
@@ -109,6 +137,8 @@ function get_jobs(req, res) {
   res.sendStatus(202);
 }
 function create_job(req, res) {
+  console.log(req.body);
+
   const company_def = req.body.company;
   const job_role = req.body.job_role;
   const job_type = req.body.job_type;
@@ -164,7 +194,7 @@ function create_job(req, res) {
       values.push(company_id, job_role_id, job_type_id);
 
       const create_sql = "INSERT INTO job SET " + args.join();
-      db.queryWithArgMapFromPool(update_query, values, (error, results) => {
+      db.queryWithArgMapFromPool(create_sql, values, (error, results) => {
         if(error) {
           util.errorLog("create_job SQL error: " + error);
           res.sendStatus(500);
