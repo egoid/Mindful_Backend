@@ -85,6 +85,12 @@ const SKILL_KEYS = [
   'skill_type_name',
   'skill_type_desc'
 ];
+const LABEL_TO_RADIUS = {
+  walk: 1,
+  bike: 3,
+  transit: 5,
+  drive: 10
+};
 
 function _extract_job_def(req) {
   return {
@@ -187,26 +193,96 @@ function _create_industry(industry_def, conn, done) {
   }
 }
 function _make_job_from_results(results) {
-  let job = _.pick(results[0], JOB_KEYS);
-  let job_role = _.pick(results[0], JOB_ROLE_KEYS);
-  let job_type = _.pick(results[0], JOB_TYPE_KEYS);
-  let company = _.pick(results[0], COMPANY_KEYS);
+  let result = {};
 
-  let skills = [];
-  _.each(results, (r) => {
-    skills.push(_.pick(r, SKILL_KEYS));
-  });
+  if(results.length) {
+    let job = _.pick(results[0], JOB_KEYS);
+    let job_role = _.pick(results[0], JOB_ROLE_KEYS);
+    let job_type = _.pick(results[0], JOB_TYPE_KEYS);
+    let company = _.pick(results[0], COMPANY_KEYS);
 
-  company.property_bag = JSON.parse(company.property_bag);
+    let skills = [];
+    _.each(results, (r) => {
+      skills.push(_.pick(r, SKILL_KEYS));
+    });
 
-  return {
-    job: Object.assign({}, job, job_role, job_type, company),
-    skills,
-  };
+    company.property_bag = JSON.parse(company.property_bag);
+
+    result = {
+      job: Object.assign({}, job, job_role, job_type, company),
+      skills,
+    };
+  }
+
+  return result;
+}
+function _radius_lat_long_calc(lat, lon, radius) {
+  const R  = 3959;
+  const x1 = lon - _to_degrees(radius/R/Math.cos(_to_radians(lat)));
+  const x2 = lon + _to_degrees(radius/R/Math.cos(_to_radians(lat)));
+  const y1 = lat + _to_degrees(radius/R);
+  const y2 = lat - _to_degrees(radius/R);
+
+  return [x1, y1, x2, y2];
+}
+function _to_radians(degrees) {
+  return degrees * Math.PI / 180;
+}
+function _to_degrees(radians) {
+  return radians * 180 / Math.PI;
 }
 
 function get_jobs(req, res) {
-  res.sendStatus(202);
+  const search_location = req.body.location || req.query.location;
+  const search_radius_label = req.body.radius || req.query.radius;
+  let search_lat;
+  let search_long;
+  let search_formatted;
+
+  async.series([
+    (done) => {
+      geocoder.geocode(search_location)
+        .then((res) => {
+          search_formatted = res[0].formattedAddress;
+          search_lat = res[0].latitude;
+          search_long = res[0].longitude;
+          done();
+        })
+        .catch((err) => {
+          console.error(err);
+          done(err);
+        });
+    },
+    (done) => {
+      const values = [search_lat, search_lat, search_long, search_long];
+      const sql = "SELECT job.*, company.* , industry.*, job_role.*, job_type.*, job_skill.*, skill_type.* " +
+                  "FROM job " +
+                  "JOIN company USING(company_id) " +
+                  "JOIN industry USING(industry_id) " +
+                  "JOIN job_role USING(job_role_id) " +
+                  "JOIN job_type USING(job_type_id) " +
+                  "LEFT JOIN job_skill USING(job_id) " +
+                  "LEFT JOIN skill_type ON job_skill.skill_type_id = skill_type.skill_type_id " +
+                  "WHERE " +
+                  "latitude_lower_"  + search_radius_label + " <= ? AND " +
+                  "latitude_upper_"  + search_radius_label + " >= ? AND " +
+                  "longitude_lower_" + search_radius_label + " >= ? AND " +
+                  "longitude_upper_" + search_radius_label + " <= ?";
+
+      db.connectAndQuery({sql, values}, (error, results) => {
+        if(error) {
+          console.error(error);
+          res.sendStatus(500);
+        } else {
+          let result = _make_job_from_results(results);
+          res.status(200).send(result);
+        }
+      });
+    },
+  ],
+  (error) => {
+    res.sendStatus(500);
+  });
 }
 function create_job(req, res) {
   const company_def = req.body.company;
@@ -218,6 +294,9 @@ function create_job(req, res) {
   let job_role_id;
   let job_type_id;
   let connection;
+  let latitude = null;
+  let longitude = null;
+  let radius_coordinates = {};
 
   async.series([
     (done) => {
@@ -243,7 +322,6 @@ function create_job(req, res) {
           console.error(error);
         } else {
           company_id = result;
-          console.log('Company ID', company_id);
         }
         done(error);
       });
@@ -254,7 +332,6 @@ function create_job(req, res) {
           console.error(error);
         } else {
           job_role_id = result;
-          console.log('Job Role ID', company_id);
         }
         done(error);
       });
@@ -265,10 +342,33 @@ function create_job(req, res) {
           console.error(error);
         } else {
           job_type_id = result;
-          console.log('Job Type ID', company_id);
         }
         done(error);
       });
+    },
+    (done) => {
+      if(job_values.location) {
+        geocoder.geocode(job_values.location)
+          .then((res) => {
+            job_values.location = res[0].formattedAddress;
+            latitude = res[0].latitude;
+            longitude = res[0].longitude;
+            done();
+          })
+          .catch((err) => {
+            console.error(err);
+            done(err);
+          });
+      } else {
+        done();
+      }
+    },
+    (done) => {
+      _.each(Object.keys(LABEL_TO_RADIUS), (label) => {
+        const radius = LABEL_TO_RADIUS[label];
+        radius_coordinates[label] = _radius_lat_long_calc(latitude, longitude, radius);
+      });
+      done();
     },
     (done) => {
       const columns = [];
@@ -279,8 +379,21 @@ function create_job(req, res) {
         values.push(job_values[column_name]);
       });
 
-      columns.push('company_id', 'job_role_id', 'job_type_id');
-      values.push(company_id, job_role_id, job_type_id);
+      // Latitude is the Y axis, longitude is the X axis
+      _.each(Object.keys(radius_coordinates), (label) => {
+        columns.push('latitude_lower_' + label);
+        columns.push('longitude_lower_' + label);
+        columns.push('latitude_upper_' + label);
+        columns.push('longitude_upper_' + label);
+
+        values.push(radius_coordinates[label][3]);
+        values.push(radius_coordinates[label][2]);
+        values.push(radius_coordinates[label][1]);
+        values.push(radius_coordinates[label][0]);
+      });
+
+      columns.push('latitude, longitude, company_id', 'job_role_id', 'job_type_id');
+      values.push(latitude, longitude, company_id, job_role_id, job_type_id);
 
       const sql = "INSERT INTO job (" + columns.join(',') + ")" + " VALUES (" + "?,".repeat(values.length).slice(0,-1) + ")";
       db.queryWithConnection(connection, sql, values, (error, results) => {
