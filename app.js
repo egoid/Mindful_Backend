@@ -13,7 +13,6 @@ var errorhandler = require('errorhandler');
 // Local Files
 var routes = require('./routes');
 var config = require('./config.json');
-var db = require('./db.js');
 var util = require('./util.js');
 
 var app = express();
@@ -22,7 +21,7 @@ var is_development = app.get('env') == 'development';
 app.enable('trust proxy')
 app.set('port', process.env.PORT || 3020);
 
-if( is_development ) {
+if(is_development) {
   app.use(morgan('[:date] :method :url :status :res[content-length] - :response-time ms'));
 } else {
   app.use(morgan(':remote-addr - - [:date] ":method :url HTTP/:http-version" :status :response-time(ms) ":referrer" ":user-agent"'));
@@ -34,22 +33,6 @@ app.use(multipart());
 app.use(cookie_parser());
 app.use(method_override());
 app.use(routes.router);
-
-app.get('/status_check',function(req,res) {
-  res.header("Cache-Control", "no-cache, no-store, must-revalidate");
-  res.sendStatus(200);
-});
-
-/*
-server_control.init(app,{
-  prefix: '/',
-  repo_url: '',
-  service_port: 80,
-  http_proto: 'http',
-  secret: "",
-});
-*/
-
 app.use(my_error_handler);
 
 http.createServer(app).listen(app.get('port'),function() {
@@ -77,7 +60,6 @@ function allow_cross_domain(req,res,next) {
     next();
   }
 }
-
 function my_error_handler(err,req,res,next) {
   if (err && err.code && err.body && typeof err.code === 'number') {
     res.header("Cache-Control", "no-cache, no-store, must-revalidate");

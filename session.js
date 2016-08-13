@@ -2,7 +2,7 @@
 
 const async = require('async');
 const crypto = require('crypto');
-const db = require('./db.js');
+const db = require('./mysql_db_prod.js');
 const util = require('./util.js');
 
 const SESSION_COOKIE_MAX_AGE = 30*24*60*60*1000;

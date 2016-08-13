@@ -3,7 +3,7 @@
 const _ = require('lodash');
 const express = require('express');
 const util = require('../../util.js');
-const mysql_db = require('../../mysql_db.js');
+const db = require('../../mysql_db.js');
 
 const router = new express.Router();
 exports.router = router;
@@ -13,7 +13,7 @@ router.get('/1/jobs', get_job_list);
 
 function get_job_types(req, res) {
   const sql = "SHOW TABLES";
-  mysql_db.queryFromPool(sql, (error, results) => {
+  db.connectAndQuery({ sql }, (error, results) => {
     if(error) {
       util.errorLog(error);
       res.sendStatus(500);
@@ -26,7 +26,7 @@ function get_job_types(req, res) {
 function get_job_list(req, res) {
   const sql = "SHOW TABLES";
   const table = req.query.job_type;
-  mysql_db.queryFromPool(sql, (error, results) => {
+  db.connectAndQuery({ sql }, (error, results) => {
     if(error) {
       util.errorLog(error);
       res.sendStatus(500);
@@ -34,7 +34,7 @@ function get_job_list(req, res) {
       const table_result = _.pluck(results, 'Tables_in_yobs_tech_admin_tool_v2');
       if(table_result.indexOf(table) != -1) {
         const job_list_sql = "SELECT * FROM `" + table + "`";
-        mysql_db.queryFromPool(job_list_sql, (error, results) => {
+        db.connectAndQuery({sql: job_list_sql}, (error, results) => {
           if(error) {
             util.errorLog(error);
             res.sendStatus(500);

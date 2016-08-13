@@ -13,7 +13,7 @@ const DEFAULT_DB_CONF = {
   charset: 'utf8mb4'
 };
 
-const db_config = Object.assign(DEFAULT_DB_CONF, config.mysql_db_raw);
+const db_config = Object.assign(DEFAULT_DB_CONF, config.mysql_db_prod);
 const db_pool = mysql.createPool(db_config);
 
 function commit(connection, done) {
@@ -27,10 +27,7 @@ function commit(connection, done) {
   });
 }
 function connectAndQuery(opts, callback) {
-  const sql = opts.sql;
-  const values = opts.values || [];
-
-  queryAndGetConnection({ sql, values}, (error, results, connection) => {
+  queryAndGetConnection(opts, (error, results, connection) => {
     try {
       connection.release();
     } catch(exception) {
@@ -40,6 +37,11 @@ function connectAndQuery(opts, callback) {
       }
     }
     callback(error, results);
+  });
+}
+function getConnection(done) {
+  db_pool.getConnection((error, connection) => {
+    done(error, connection);
   });
 }
 function queryWithConnection(connection, sql, values, callback) {
@@ -79,6 +81,7 @@ function rollback(connection, done) {
 
 exports.commit = commit;
 exports.connectAndQuery = connectAndQuery;
+exports.getConnection = getConnection;
 exports.queryAndGetConnection = queryAndGetConnection;
 exports.queryWithConnection = queryWithConnection;
 exports.rollback = rollback;
