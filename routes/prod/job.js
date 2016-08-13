@@ -2,9 +2,10 @@
 
 const _ = require('lodash');
 const async = require('async');
-const express = require('express');
-const ejs = require('ejs');
 const config = require('node-config-sets');
+const ejs = require('ejs');
+const express = require('express');
+const NodeGeocoder = require('node-geocoder');
 
 const db = require('../../mysql_db_prod.js');
 const session = require('../../session.js');
@@ -14,12 +15,76 @@ const router = new express.Router();
 exports.router = router;
 
 const SINGLE_JOB_URL = '/1/job/:job_id';
+const GOOGLE_GEO_CONFIG = {
+  apiKey: 'AIzaSyAJwf4JXpI9MRGuZdYcOFT9-nq5lzbuPKI',
+  formatter: null,
+  httpAdapter: 'https',
+  provider: 'google',
+};
+const geocoder = NodeGeocoder(GOOGLE_GEO_CONFIG);
 
 router.get('/1/jobs', get_jobs);
 router.post('/1/job', create_job);
 router.put(SINGLE_JOB_URL, update_job);
 router.delete(SINGLE_JOB_URL, delete_job);
 router.get(SINGLE_JOB_URL, get_job);
+
+const JOB_KEYS = [
+  'job_id',
+  'company_id',
+  'employer_id',
+  'title',
+  'pay_rate_min',
+  'pay_rate_max',
+  'job_schedule_id',
+  'min_gpa',
+  'school_level_id',
+  'description',
+  'responsibilities',
+  'activities',
+  'is_yobs_client',
+  'external_url',
+  'posted_at',
+  'takedown_at',
+  'created_at',
+  'created_by',
+  'modified_at',
+  'modified_by',
+  'is_deleted',
+  'deleted_at',
+  'deleted_by',
+  'location'
+];
+const COMPANY_KEYS = [
+  'company_id',
+  'name',
+  'industry_id',
+  'email_domain',
+  'property_bag',
+  'created_at',
+  'created_by',
+  'modified_at',
+  'modified_by',
+  'is_deleted',
+  'deleted_at',
+  'deleted_by',
+];
+const JOB_ROLE_KEYS = [
+  'job_role_id',
+  'job_role_name',
+  'job_role_descr'
+];
+const JOB_TYPE_KEYS = [
+  'job_type_id',
+  'job_type_name',
+  'job_type_descr'
+];
+const SKILL_KEYS = [
+  'job_skill_id',
+  'skill_type_id',
+  'skill_type_name',
+  'skill_type_desc'
+];
 
 function _extract_job_def(req) {
   return {
@@ -120,6 +185,24 @@ function _create_industry(industry_def, conn, done) {
       done(error, industry_id);
     });
   }
+}
+function _make_job_from_results(results) {
+  let job = _.pick(results[0], JOB_KEYS);
+  let job_role = _.pick(results[0], JOB_ROLE_KEYS);
+  let job_type = _.pick(results[0], JOB_TYPE_KEYS);
+  let company = _.pick(results[0], COMPANY_KEYS);
+
+  let skills = [];
+  _.each(results, (r) => {
+    skills.push(_.pick(r, SKILL_KEYS));
+  });
+
+  company.property_bag = JSON.parse(company.property_bag);
+
+  return {
+    job: Object.assign({}, job, job_role, job_type, company),
+    skills,
+  };
 }
 
 function get_jobs(req, res) {
@@ -230,16 +313,14 @@ function update_job(req, res) {
   if(!company_def.id || !job_role.id || !job_type.id) {
     res.status(400).send("When updating a job, company, job roles, and job types cannot be created.");
   } else {
-
     const args = [];
     const values = [];
-    Object.keys(company_def).forEach((column_name, count) => {
-      const sql_index = '$' + (count + 1);
-      args.push(column_name + "=" + sql_index);
-      values.push(company_def[column_name]);
+    _.each(Object.keys(job_values), (column) => {
+      args.push(column + "=?");
+      values.push(job_values[column]);
     });
 
-    const sql = "UPDATE job SET " + args.join();
+    const sql = "UPDATE job SET " + args.join(",");
     db.connectAndQuery({sql, values}, (error, results) => {
       if(error) {
         console.error("update_job SQL error: " + error);
@@ -263,5 +344,22 @@ function delete_job(req, res) {
   });
 }
 function get_job(req, res) {
-  res.sendStatus(202);
+  const sql = "SELECT job.*, company.* , industry.*, job_role.*, job_type.*, job_skill.*, skill_type.* " +
+              "FROM job " +
+              "JOIN company USING(company_id) " +
+              "JOIN industry USING(industry_id) " +
+              "JOIN job_role USING(job_role_id) " +
+              "JOIN job_type USING(job_type_id) " +
+              "LEFT JOIN job_skill USING(job_id) " +
+              "LEFT JOIN skill_type ON job_skill.skill_type_id = skill_type.skill_type_id " +
+              "WHERE job_id = ?";
+    db.connectAndQuery({sql, values: [req.params.job_id]}, (error, results) => {
+      if(error) {
+        console.error(error);
+        res.sendStatus(500);
+      } else {
+        let result = _make_job_from_results(results);
+        res.status(200).send(result);
+      }
+    });
 }
