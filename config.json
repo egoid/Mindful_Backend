@@ -6,10 +6,10 @@
     "database": "yobs_tech_admin_tool_v2"
   },
   "mysql_db_prod": {
-    "host": "localhost",
-    "user": "root",
-    "password": "",
-    "database": "yobs_prod"
+    "host": "db-yobs.ccdbcoc5fc3t.us-west-2.rds.amazonaws.com",
+    "user": "guest",
+    "password": "yobs2016",
+    "database": "yobs_tech_admin_tool_v2"
   },
   "aws": {
     "accessKeyId": "",
