@@ -1,7 +1,3 @@
-CREATE DATABASE yobs_prod;
-
-USE yobs_prod
-
 CREATE TABLE industry (
   industry_id INT NOT NULL AUTO_INCREMENT,
   industry_name varchar(255),
