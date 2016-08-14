@@ -246,7 +246,6 @@ function _create_industry(industry_def, conn, all_done) {
         });
       },
       (done) => {
-        let block_err;
         if(!industry_id) {
           const sql = "INSERT IGNORE INTO industry (industry_name, industry_type) VALUES (?, ?)";
           const values = [industry_def.name, industry_def.type];
@@ -257,9 +256,11 @@ function _create_industry(industry_def, conn, all_done) {
             } else {
               industry_id = results.insertId;
             }
+            done(error);
           });
+        } else {
+          done();
         }
-        done(block_err);
       },
     ],
     (error) => {
@@ -475,6 +476,8 @@ function get_job(req, res) {
               "LEFT JOIN job_skill USING(job_id) " +
               "LEFT JOIN skill_type ON job_skill.skill_type_id = skill_type.skill_type_id " +
               "WHERE job_id = ?";
+
+    console.log(sql);
     db.connectAndQuery({sql, values: [req.params.job_id]}, (error, results) => {
       if(error) {
         console.error(error);
