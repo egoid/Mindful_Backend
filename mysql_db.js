@@ -13,6 +13,12 @@ const DEFAULT_DB_CONF = {
   charset: 'utf8mb4'
 };
 
+if(process.env.environment == 'prod') {
+  config.mysql_db_raw.host = process.env.RDS_hostname;
+  config.mysql_db_raw.password = process.env.RDS_password;
+  config.mysql_db_raw.port = process.env.RDS_port;
+}
+
 const db_config = Object.assign(DEFAULT_DB_CONF, config.mysql_db_raw);
 const db_pool = mysql.createPool(db_config);
 
