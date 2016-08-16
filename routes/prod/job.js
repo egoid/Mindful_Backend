@@ -128,7 +128,6 @@ function _create_company(company_def, conn, all_done) {
           const values = [company_def.name, industry_id, company_def.email_domain, JSON.stringify(company_def.property_bag)];
           db.queryWithConnection(conn, sql , values, (error, results) => {
             if(error) {
-              block_err = error;
               console.error("_create_company SQL error: " + error);
             } else {
               company_id = results.insertId;
@@ -169,7 +168,6 @@ function _create_job_role(role_def, conn, all_done) {
           const values = [role_def.name, role_def.type];
           db.queryWithConnection(conn, sql, values, (error, results) => {
             if(error) {
-              block_err = error;
               console.error("_create_job_role SQL error: " + error);
             } else {
               role_id = results.insertId;
@@ -211,7 +209,6 @@ function _create_job_type(type_def, conn, all_done) {
           db.queryWithConnection(conn, sql, values, (error, results) => {
             if(error) {
               console.error("_create_job_type SQL error: " + error);
-              block_err = error;
             } else {
               type_id = results.insertId;
             }
@@ -239,7 +236,7 @@ function _create_industry(industry_def, conn, all_done) {
         db.queryWithConnection(conn, sql , values, (error, results) => {
           if(error) {
             console.error("_create_industry SQL error: " + error);
-          } else if(results.length > 0) {
+          } else if(results[0] && results[0].industry_id) {
             industry_id = results[0].industry_id;
           }
           done(error);
@@ -252,7 +249,6 @@ function _create_industry(industry_def, conn, all_done) {
           db.queryWithConnection(conn, sql, values, (error, results) => {
             if(error) {
               console.error("_create_company SQL error: " + error);
-              block_err = error;
             } else {
               industry_id = results.insertId;
             }

@@ -1,14 +1,14 @@
 {
-  "environment": "prod",
+  "environment": "dev",
   "mysql_db_raw": {
     "host": "",
-    "user": "guest",
+    "user": "root",
     "password": "",
     "database": "yobs_tech_admin_tool_v2"
   },
   "mysql_db_prod": {
     "host": "",
-    "user": "guest",
+    "user": "root",
     "password": "",
     "database": "yobs_tech_admin_tool_v2"
   },
