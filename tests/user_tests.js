@@ -1,7 +1,8 @@
 /*====================== User Registration Request ======================*/
 var json_data = JSON.stringify({
   email: "saronoff@gmail",
-  password: "foobar"
+  password: "foobar",
+  user_type: "employee"
 });
 
 var xhr = new XMLHttpRequest();

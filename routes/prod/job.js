@@ -86,10 +86,10 @@ const SKILL_KEYS = [
   'skill_type_desc'
 ];
 const LABEL_TO_RADIUS = {
-  walk: 1,
-  bike: 3,
-  transit: 5,
-  drive: 10
+  walk: 1.25,
+  bike: 4,
+  transit: 8,
+  drive: 8
 };
 
 function _create_company(company_def, conn, all_done) {
@@ -452,7 +452,7 @@ function create_job(req, res) {
 }
 function delete_job(req, res) {
   const values = [req.params.job_id];
-  const sql = "DELETE FROM job WHERE job_id = $1::int";
+  const sql = "DELETE FROM job WHERE job_id = ?";
   db.connectAndQuery({sql, values}, (error, results) => {
     if(error) {
       console.error("delete_job SQL error: " + error);

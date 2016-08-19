@@ -186,6 +186,7 @@ CREATE TABLE job_skill (
 CREATE TABLE user (
   user_id int not null auto_increment,
   alias varchar(255),
+  user_type ENUM('employee', 'employer free', 'employer_paid_1', 'employer_paid_2') DEFAULT 'employee',
   email varchar(255),
   password varchar(255),
   user_type_id int,
@@ -202,4 +203,104 @@ CREATE TABLE user (
   PRIMARY KEY (user_id),
   CONSTRAINT user_role FOREIGN KEY (user_role_id) REFERENCES user_role (user_role_id) ON UPDATE CASCADE ON DELETE CASCADE,
   CONSTRAINT user_type FOREIGN KEY (user_type_id) REFERENCES user_type (user_type_id) ON UPDATE CASCADE ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+CREATE TABLE employee (
+  employee_id int not null AUTO_INCREMENT,
+  user_id int not null,
+  school_id int,
+  location_name text,
+  location_latitude FLOAT,
+  location_longitude FLOAT,
+  transportation ENUM('walk', 'bike', 'metro', 'car'),
+  tipi_score_id int,
+  headline varchar(255),
+  school_level ENUM('graduate', 'undergraduate', 'highschool'),
+  gpa float,
+  video_url text,
+  schedule_id int,
+  PRIMARY KEY (employee_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+CREATE TABLE employee_job (
+  employee_job_id int not null AUTO_INCREMENT,
+  employee_id int,
+  job_id int,
+  status ENUM('saved', 'submitted', 'reviewed', 'interview', 'offer', 'pass'),
+  interview_date DATETIME,
+  modified_at DATETIME,
+  PRIMARY KEY (employee_job_id),
+  UNIQUE KEY employee_and_job (employee_id, job_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+CREATE TABLE employee_skill (
+  employee_skill_id int not null AUTO_INCREMENT,
+  employee_id int,
+  skill_type_id int,
+  PRIMARY KEY(employee_skill_id),
+  UNIQUE KEY employee_and_skill (employee_id, skill_type_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+CREATE TABLE employee_role (
+  employee_role_id int not null AUTO_INCREMENT,
+  employee_id int,
+  job_role_id int,
+  PRIMARY KEY(employee_role_id),
+  UNIQUE KEY employee_and_skill (employee_id, job_role_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+CREATE TABLE school (
+  school_id int not null AUTO_INCREMENT,
+  name text,
+  location_name text,
+  location_latitude float,
+  location_longitude float,
+  PRIMARY KEY(school_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+CREATE TABLE employee_experience (
+  employee_experience_id int not null AUTO_INCREMENT,
+  employee_id int,
+  company varchar(255),
+  job_role_id int,
+  start_date DATETIME,
+  end_date DATETIME,
+  PRIMARY KEY(employee_experience_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+CREATE TABLE tipi_score (
+  tipi_score_id int not null AUTO_INCREMENT,
+  employee_id int,
+  extraversion float,
+  agreeableness float,
+  conscientiousness float,
+  emotional_stability float,
+  openness_to_experiences float,
+  PRIMARY KEY(tipi_score_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+CREATE TABLE employee_schedule (
+  employee_schedule_id int not null AUTO_INCREMENT,
+  employee_id int,
+  sunday_schedule ENUM('all', 'none', 'morning', 'afternoon', 'evening', 'night'),
+  monday_schedule ENUM('all', 'none', 'morning', 'afternoon', 'evening', 'night'),
+  tuesday_schedule ENUM('all', 'none', 'morning', 'afternoon', 'evening', 'night'),
+  wednesday_schedule ENUM('all', 'none', 'morning', 'afternoon', 'evening', 'night'),
+  thursday_schedule ENUM('all', 'none', 'morning', 'afternoon', 'evening', 'night'),
+  friday_schedule ENUM('all', 'none', 'morning', 'afternoon', 'evening', 'night'),
+  saturday_schedule ENUM('all', 'none', 'morning', 'afternoon', 'evening', 'night'),
+  PRIMARY KEY(employee_schedule_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+CREATE TABLE job_schedule (
+  job_schedule_id int not null AUTO_INCREMENT,
+  job_id int,
+  sunday_schedule ENUM('all', 'none', 'morning', 'afternoon', 'evening', 'night'),
+  monday_schedule ENUM('all', 'none', 'morning', 'afternoon', 'evening', 'night'),
+  tuesday_schedule ENUM('all', 'none', 'morning', 'afternoon', 'evening', 'night'),
+  wednesday_schedule ENUM('all', 'none', 'morning', 'afternoon', 'evening', 'night'),
+  thursday_schedule ENUM('all', 'none', 'morning', 'afternoon', 'evening', 'night'),
+  friday_schedule ENUM('all', 'none', 'morning', 'afternoon', 'evening', 'night'),
+  saturday_schedule ENUM('all', 'none', 'morning', 'afternoon', 'evening', 'night'),
+  PRIMARY KEY(job_schedule_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;

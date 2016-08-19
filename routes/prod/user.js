@@ -4,8 +4,6 @@ const _ = require('lodash');
 const async = require('async');
 const bcrypt = require('bcrypt');
 const crypto = require('crypto');
-const config = require('node-config-sets');
-const ejs = require('ejs');
 const express = require('express');
 
 const db = require('../../mysql_db_prod.js');
@@ -14,6 +12,8 @@ const util = require('../../util.js');
 
 const router = new express.Router();
 exports.router = router;
+
+const USER_TYPES = ['employee', 'employer free', 'employer_paid_1', 'employer_paid_2'];
 
 router.get('/1/user/current',   get_current);
 router.post('/1/user/login',    login);
@@ -115,6 +115,13 @@ function login(req, res) {
 function register(req, res) {
   const email = req.body.email;
   const password = req.body.password;
+  const user_type = req.body.user_type;
+
+  if(user_type && USER_TYPES.indexOf(user_type) < 0) {
+    res.status(400).send('Invalid user type');
+  } else if(!user_type) {
+    user_type = 'employee';
+  }
 
   let session_key;
   let pw_hash;
@@ -141,7 +148,7 @@ function register(req, res) {
       });
     },
     (done) => {
-      const sql = "INSERT INTO user (email, password) VALUES (?, ?)";
+      const sql = "INSERT INTO user (email, password, user_type) VALUES (?, ?, ?)";
       const values = [email, pw_hash];
       db.connectAndQuery({sql, values}, (error, results) => {
         if(error) {
