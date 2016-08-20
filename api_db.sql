@@ -14,14 +14,6 @@ CREATE TABLE company_genera (
   UNIQUE KEY un_company_genera_genus (genus)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
-CREATE TABLE employment_type (
-  employment_type_id INT NOT NULL AUTO_INCREMENT,
-  employment_type_name varchar(255),
-  employment_type_descr varchar(255),
-  PRIMARY KEY (employment_type_id),
-  UNIQUE KEY un_employment_type (employment_type_name)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
-
 CREATE TABLE job_role (
   job_role_id int not null auto_increment,
   job_role_name varchar(255),
@@ -36,14 +28,6 @@ CREATE TABLE job_type (
   job_type_descr varchar(255),
   PRIMARY KEY (job_type_id),
   UNIQUE KEY un_job_type_descr (job_type_descr)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
-
-CREATE TABLE school_level (
-  school_level_id int not null auto_increment,
-  school_level_name varchar(255),
-  school_level_descr varchar(255),
-  PRIMARY KEY (school_level_id),
-  UNIQUE KEY un_school_level_descr (school_level_descr)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 CREATE TABLE skill_type (
@@ -107,7 +91,6 @@ CREATE TABLE job (
   pay_rate_max FLOAT,
   job_schedule_id INT,
   min_gpa FLOAT,
-  school_level_id INT,
   description text,
   responsibilities text,
   activities text,
@@ -136,20 +119,20 @@ CREATE TABLE job (
   latitude_upper_bike float DEFAULT NULL,
   longitude_upper_bike float DEFAULT NULL,
 
-  latitude_lower_transit float DEFAULT NULL,
-  longitude_lower_transit float DEFAULT NULL,
-  latitude_upper_transit float DEFAULT NULL,
-  longitude_upper_transit float DEFAULT NULL,
+  latitude_lower_metro float DEFAULT NULL,
+  longitude_lower_metro float DEFAULT NULL,
+  latitude_upper_metro float DEFAULT NULL,
+  longitude_upper_metro float DEFAULT NULL,
 
-  latitude_lower_drive float DEFAULT NULL,
-  longitude_lower_drive float DEFAULT NULL,
-  latitude_upper_drive float DEFAULT NULL,
-  longitude_upper_drive float DEFAULT NULL,
+  latitude_lower_car float DEFAULT NULL,
+  longitude_lower_car float DEFAULT NULL,
+  latitude_upper_car float DEFAULT NULL,
+  longitude_upper_car float DEFAULT NULL,
 
   PRIMARY KEY (job_id),
 
-  KEY latitude (latitude),
-  KEY longitude (longitude),
+  KEY company_id (company_id),
+  KEY employer_id (employer_id),
   KEY latitude_lower_walk (latitude_lower_walk),
   KEY longitude_lower_walk (longitude_lower_walk),
   KEY latitude_upper_walk (latitude_upper_walk),
@@ -158,19 +141,18 @@ CREATE TABLE job (
   KEY longitude_lower_bike (longitude_lower_bike),
   KEY latitude_upper_bike (latitude_upper_bike),
   KEY longitude_upper_bike (longitude_upper_bike),
-  KEY latitude_lower_transit (latitude_lower_transit),
-  KEY longitude_lower_transit (longitude_lower_transit),
-  KEY latitude_upper_transit (latitude_upper_transit),
-  KEY longitude_upper_transit (longitude_upper_transit),
-  KEY latitude_lower_drive (latitude_lower_drive),
-  KEY longitude_lower_drive (longitude_lower_drive),
-  KEY latitude_upper_drive (latitude_upper_drive),
-  KEY longitude_upper_drive (longitude_upper_drive),
+  KEY latitude_lower_metro (latitude_lower_metro),
+  KEY longitude_lower_metro (longitude_lower_metro),
+  KEY latitude_upper_metro (latitude_upper_metro),
+  KEY longitude_upper_metro (longitude_upper_metro),
+  KEY latitude_lower_car (latitude_lower_car),
+  KEY longitude_lower_car (longitude_lower_car),
+  KEY latitude_upper_car (latitude_upper_car),
+  KEY longitude_upper_car (longitude_upper_car),
 
   CONSTRAINT job_to_company FOREIGN KEY (company_id) REFERENCES company (company_id) ON UPDATE CASCADE ON DELETE CASCADE,
   CONSTRAINT job_to_job_type FOREIGN KEY (job_type_id) REFERENCES job_type (job_type_id) ON UPDATE CASCADE ON DELETE CASCADE,
-  CONSTRAINT job_to_role FOREIGN KEY (job_role_id) REFERENCES job_role (job_role_id) ON UPDATE CASCADE ON DELETE CASCADE,
-  CONSTRAINT job_to_school_level FOREIGN KEY (school_level_id) REFERENCES school_level (school_level_id) ON UPDATE CASCADE ON DELETE CASCADE
+  CONSTRAINT job_to_role FOREIGN KEY (job_role_id) REFERENCES job_role (job_role_id) ON UPDATE CASCADE ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 CREATE TABLE job_skill (
@@ -222,6 +204,15 @@ CREATE TABLE employee (
   PRIMARY KEY (employee_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
+CREATE TABLE employer (
+  employer_id int not null AUTO_INCREMENT,
+  user_id int not null,
+  location_name text,
+  location_latitude FLOAT,
+  location_longitude FLOAT,
+  PRIMARY KEY (employer_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
 CREATE TABLE employee_job (
   employee_job_id int not null AUTO_INCREMENT,
   employee_id int,
@@ -239,14 +230,6 @@ CREATE TABLE employee_skill (
   skill_type_id int,
   PRIMARY KEY(employee_skill_id),
   UNIQUE KEY employee_and_skill (employee_id, skill_type_id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
-
-CREATE TABLE employee_role (
-  employee_role_id int not null AUTO_INCREMENT,
-  employee_id int,
-  job_role_id int,
-  PRIMARY KEY(employee_role_id),
-  UNIQUE KEY employee_and_skill (employee_id, job_role_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 CREATE TABLE school (

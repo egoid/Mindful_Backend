@@ -88,8 +88,8 @@ const SKILL_KEYS = [
 const LABEL_TO_RADIUS = {
   walk: 1.25,
   bike: 4,
-  transit: 8,
-  drive: 8
+  metro: 8,
+  car: 8
 };
 
 function _create_company(company_def, conn, all_done) {
@@ -484,6 +484,34 @@ function get_job(req, res) {
       }
     });
 }
+function update_job(req, res) {
+  const company_def = req.body.company;
+  const job_role = req.body.job_role;
+  const job_type = req.body.job_type;
+  const job_values = _extract_job_def(req);
+
+  if(!company_def.id || !job_role.id || !job_type.id) {
+    res.status(400).send("When updating a job, company, job roles, and job types cannot be created.");
+  } else {
+    const args = [];
+    const values = [];
+    _.each(Object.keys(job_values), (column) => {
+      args.push(column + "=?");
+      values.push(job_values[column]);
+    });
+
+    const sql = "UPDATE job SET " + args.join(",");
+    db.connectAndQuery({sql, values}, (error, results) => {
+      if(error) {
+        console.error("update_job SQL error: " + error);
+        res.sendStatus(500);
+      } else {
+        res.sendStatus(200);
+      }
+    });
+  }
+}
+
 function get_jobs(req, res) {
   const search_location = req.body.location || req.query.location;
   const search_radius_label = req.body.radius || req.query.radius;
@@ -535,31 +563,4 @@ function get_jobs(req, res) {
   (error) => {
     res.sendStatus(500);
   });
-}
-function update_job(req, res) {
-  const company_def = req.body.company;
-  const job_role = req.body.job_role;
-  const job_type = req.body.job_type;
-  const job_values = _extract_job_def(req);
-
-  if(!company_def.id || !job_role.id || !job_type.id) {
-    res.status(400).send("When updating a job, company, job roles, and job types cannot be created.");
-  } else {
-    const args = [];
-    const values = [];
-    _.each(Object.keys(job_values), (column) => {
-      args.push(column + "=?");
-      values.push(job_values[column]);
-    });
-
-    const sql = "UPDATE job SET " + args.join(",");
-    db.connectAndQuery({sql, values}, (error, results) => {
-      if(error) {
-        console.error("update_job SQL error: " + error);
-        res.sendStatus(500);
-      } else {
-        res.sendStatus(200);
-      }
-    });
-  }
 }

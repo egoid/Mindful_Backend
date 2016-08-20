@@ -31,10 +31,6 @@ router.get('/1/employee_job/:employee_job_id', get_employee_job)
 router.post('/1/employee/:employee_id/job', add_employee_job);
 router.delete('/1/employee_job/:employee_job_id', delete_employee_job);
 
-router.get('/1/employee_role/:employee_role_id', get_employee_job_role)
-router.post('/1/employee/:employee_id/role', add_employee_job_role);
-router.delete('/1/employee_role/:employee_role_id', delete_employee_job_role);
-
 router.get('/1/employee_skill/:employee_skill_id', get_employee_skill)
 router.post('/1/employee/:employee_id/skill', add_employee_skill);
 router.delete('/1/employee_skill/:employee_skill_id', delete_employee_skill);
@@ -273,48 +269,6 @@ add_employee_job(req, res) {
 delete_employee_job(req, res) {
   const sql = "DELETE FROM employee_job WHERE employee_job_id = ?";
   const values = [req.params.employee_job_id];
-  db.connectAndQuery({sql, values}, (error, results) => {
-    if(error) {
-      console.error(error);
-      res.sendStatus(500);
-    } else {
-      res.sendStatus(200);
-    }
-  });
-}
-
-/**** EMPLOYEE JOB ROLE ENDPOINTS ****/
-get_employee_job_role(req, res) {
-  const sql = "SELECT * FROM employee_role WHERE employee_role_id = ?";
-  const values = [req.params.employee_role_id];
-  db.connectAndQuery({sql, values}, (error, results) => {
-    if(error) {
-      console.error(error);
-      res.sendStatus(500);
-    } else {
-      res.status(200).send(results);
-    }
-  });
-}
-add_employee_job_role(req, res) {
-  const employee_id = req.params.employee_id;
-  const job_role_id = req.body.job_role_id;
-
-  const sql = "INSERT INTO employee_role (employee_id, job_role_id) VALUES (?,?)";
-  const values = [employee_id, job_role_id];
-
-  db.connectAndQuery({sql, values}, (error, results) => {
-    if(error) {
-      console.error(error);
-      res.sendStatus(500);
-    } else {
-      res.status(201).send(results.insertId);
-    }
-  });
-}
-delete_employee_job_role(req, res) {
-  const sql = "DELETE FROM employee_role WHERE employee_role_id = ?";
-  const values = [req.params.employee_role_id];
   db.connectAndQuery({sql, values}, (error, results) => {
     if(error) {
       console.error(error);
