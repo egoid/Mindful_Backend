@@ -16,11 +16,13 @@ router.get('/1/industry/:industry_id', get_industry);
 router.put('/1/industry/:industry_id', update_industry);
 router.delete('/1/industry/:industry_id', delete_industry);
 
+router.get('/1/industry', get_all_industry);
+
 function create_industry(req, res) {
   const name = req.body.name;
   const type = req.body.type;
 
-  const sql = "INSERT INTO industry (industry_name, industry_type) VALUES (?)";
+  const sql = "INSERT INTO industry (industry_name, industry_type) VALUES (?,?)";
   const values = [name, type];
   db.connectAndQuery({sql, values}, (error, results) => {
     if(error) {
@@ -73,6 +75,18 @@ function delete_industry(req, res) {
       res.sendStatus(404);
     } else {
       res.sendStatus(200);
+    }
+  });
+}
+
+function get_all_industry(req, res) {
+  const sql = "SELECT * FROM industry LIMIT 100";
+  db.connectAndQuery({sql}, (error, results) => {
+    if(error) {
+      console.error("get_all_industry: sql err:", error);
+      res.sendStatus(500);
+    } else {
+      res.status(200).send(results);
     }
   });
 }

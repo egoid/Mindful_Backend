@@ -3,6 +3,7 @@ const router = new express.Router();
 
 const company = require('./company.js');
 const employee = require('./employee.js');
+const employee_industry = require('./employee_industry.js');
 const employer = require('./employer.js');
 const industry = require('./industry.js');
 const job = require('./job.js');
@@ -16,6 +17,7 @@ exports.router = router;
 
 router.use(company.router);
 router.use(employee.router);
+router.use(employee_industry.router);
 router.use(employer.router);
 router.use(industry.router);
 router.use(job.router);

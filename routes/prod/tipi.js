@@ -30,7 +30,7 @@ function create_tipi(req, res) {
 
     const sql = "INSERT INTO tipi_score " +
     "(employee_id, extraversion, agreeableness, conscientiousness, " +
-    " emotional_stability, openness_to_experiences) VALUES (?)";
+    " emotional_stability, openness_to_experiences) VALUES (?,?,?,?,?,?)";
     const values = [employee_id, extraversion, agreeableness, conscientiousness,
                     emotional_stability, openness_to_experiences];
     db.connectAndQuery({sql, values}, (error, results) => {

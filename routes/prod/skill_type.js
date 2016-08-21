@@ -36,7 +36,7 @@ function create_skill_type(req, res) {
     },
     (done) => {
       if(!skill_type_id) {
-        const sql = "INSERT INTO skill_type (skill_type_name, skill_type_descr) VALUES (?)";
+        const sql = "INSERT INTO skill_type (skill_type_name, skill_type_descr) VALUES (?,?)";
         const values = [name, type];
         db.connectAndQuery({sql, values}, (error, results) => {
           if(error) {

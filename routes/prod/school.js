@@ -49,7 +49,7 @@ function create_school(req, res) {
         });
     },
     (done) => {
-      const sql = "INSERT INTO school (name, location_name, location_latitude, location_longitude) VALUES (?)";
+      const sql = "INSERT INTO school (name, location_name, location_latitude, location_longitude) VALUES (?,?,?,?)";
       const values = [name, formatted_location, latitude, longitude];
       db.connectAndQuery({sql, values}, (error, results) => {
         if(error) {

@@ -98,7 +98,7 @@ function login(req, res) {
       });
     },
     (done) => {
-      const sql = "INSERT INTO user_session (user_session_key, user_id) VALUES (?, ?)";
+      const sql = "INSERT INTO user_session (user_session_key, user_id) VALUES (?,?)";
       const values = [session_key, user_id];
       db.connectAndQuery({sql, values}, (error, results) => {
         if(error) {
@@ -168,7 +168,7 @@ function register(req, res) {
       });
     },
     (done) => {
-      const sql = "INSERT INTO user (email, password, user_type, user_role_id) VALUES (?, ?, ?, ?)";
+      const sql = "INSERT INTO user (email, password, user_type, user_role_id) VALUES (?,?,?,?)";
       const values = [email, pw_hash, user_type, user_role_id];
       db.queryWithConnection(connection, sql, values, (error, results) => {
         if(error) {
@@ -190,7 +190,7 @@ function register(req, res) {
       });
     },
     (done) => {
-      const sql = "INSERT INTO user_session (user_session_key, user_id) VALUES (?, ?)";
+      const sql = "INSERT INTO user_session (user_session_key, user_id) VALUES (?,?)";
       const values = [session_key, user_id];
       db.queryWithConnection(connection, sql, values, (error, results) => {
         if(error) {
@@ -219,7 +219,7 @@ function register(req, res) {
 }
 
 function create_user_role(req, res) {
-  const sql = "INSERT INTO user_role (user_role_name, user_role_descr) VALUES (?)";
+  const sql = "INSERT INTO user_role (user_role_name, user_role_descr) VALUES (?,?)";
   const values = [req.body.name, req.body.type];
   db.connectAndQuery({sql, values}, (error, results) => {
     if(error) {
@@ -279,7 +279,7 @@ function delete_user_role(req, res) {
 }
 
 function create_user_type(req, res) {
-  const sql = "INSERT INTO user_type (user_type_name, user_type_descr) VALUES (?)";
+  const sql = "INSERT INTO user_type (user_type_name, user_type_descr) VALUES (?,?)";
   const values = [req.body.name, req.body.type];
   db.connectAndQuery({sql, values}, (error, results) => {
     if(error) {

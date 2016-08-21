@@ -328,7 +328,7 @@ function create_employee_sched(req, res) {
                 "(employee_id, sunday_schedule, monday_schedule, " +
                 " tuesday_schedule, wednesday_schedule, thursday_schedule, " +
                 " friday_schedule, saturday_schedule) VALUES "
-                "(?)";
+                "(?, ?, ?, ?, ?, ?, ?, ?)";
     db.connectAndQuery({sql, values}, (error, results) => {
       if(error) {
         consle.error(error);
@@ -468,7 +468,7 @@ function create_employee_job(req, res) {
   }
 
   const sql = "INSERT INTO employee_role " +
-              "(employee_id, job_id, status, interview_date) VALUES (?)";
+              "(employee_id, job_id, status, interview_date) VALUES (?,?,?,?)";
   const values = [employee_id, job_id, job_status, interview_date];
 
   db.connectAndQuery({sql, values}, (error, results) => {

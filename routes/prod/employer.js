@@ -76,7 +76,7 @@ function create_employer(req, res) {
       },
       (done) => {
         const sql = "INSERT INTO employer " +
-        "(user_id, location_name, location_latitude, location_longitude) VALUES (?)";
+        "(user_id, location_name, location_latitude, location_longitude) VALUES (?,?,?,?)";
         const values = [user_id, search_formatted, search_lat, search_long];
 
         db.connectAndQuery({sql, values}, (error, results) => {

@@ -36,7 +36,7 @@ function create_shift_type(req, res) {
     },
     (done) => {
       if(!shift_type_id) {
-        const sql = "INSERT INTO shift_type (shift_type_name, shift_type_descr) VALUES (?)";
+        const sql = "INSERT INTO shift_type (shift_type_name, shift_type_descr) VALUES (?,?)";
         const values = [name, type];
         db.connectAndQuery({sql, values}, (error, results) => {
           if(error) {

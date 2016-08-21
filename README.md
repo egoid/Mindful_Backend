@@ -170,8 +170,17 @@
         * Seven-item list, sunday is 0, each value should be one of ['all','none','morning','afternoon','evening','night']
 * delete - '/1/employee_schedule/:employee_sched_id'
 
-# Get List of Companies *
+# Single Employee Interested Industries #
+* post - '/1/employee_industry'
+    * employee_id
+    * industry_id
+* delete - '/1/employee_industry/:employee_industry_id'
+
+# Get List of Companies #
 * get - '/1/company'
+
+# Get List of Industries #
+* get - '/1/industry'
 
 # Get List of Jobs #
 * get - '/1/employee/:employee_id/job'

@@ -132,7 +132,7 @@ function _create_company(company_def, conn, all_done) {
       },
       (done) => {
         if(!company_id) {
-          const sql = "INSERT INTO company (name, industry_id, email_domain, property_bag) VALUES (?, ?, ?, ?)";
+          const sql = "INSERT INTO company (name, industry_id, email_domain, property_bag) VALUES (?,?,?,?)";
           const values = [company_def.name, industry_id, company_def.email_domain, JSON.stringify(company_def.property_bag)];
           db.queryWithConnection(conn, sql , values, (error, results) => {
             if(error) {
@@ -613,7 +613,7 @@ function create_job_sched(req, res) {
                 "(job_id, sunday_schedule, monday_schedule, " +
                 " tuesday_schedule, wednesday_schedule, thursday_schedule, " +
                 " friday_schedule, saturday_schedule) VALUES "
-                "(?)";
+                "(?,?,?,?,?,?,?,?)";
     db.connectAndQuery({sql, values}, (error, results) => {
       if(error) {
         consle.error(error);
