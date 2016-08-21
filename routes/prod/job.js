@@ -475,6 +475,8 @@ function get_job(req, res) {
       if(error) {
         console.error("get_job: sql err:", error);
         res.sendStatus(500);
+      } else if(results.length < 1) {
+        res.sendStatus(404);
       } else {
         let result = _make_job_from_results(results);
         res.status(200).send(result);
@@ -587,8 +589,10 @@ function get_job_sched(req, res) {
     if(error) {
       console.error("get_job_sched: sql err:", error);
       res.sendStatus(500);
+    } else if(results.length < 1) {
+      res.sendStatus(404);
     } else {
-      res.status(200).send(results);
+      res.status(200).send(results[0]);
     }
   });
 }
@@ -692,8 +696,10 @@ function get_job_skill(req, res) {
     if(error) {
       console.error("get_job_skill: sql err:", error);
       res.sendStatus(500);
+    } else if(results.length < 1) {
+      res.sendStatus(404);
     } else {
-      res.status(200).send(results);
+      res.status(200).send(results[0]);
     }
   });
 }

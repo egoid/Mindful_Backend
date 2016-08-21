@@ -19,6 +19,12 @@ router.get('/1/user/current',   get_current);
 router.post('/1/user/login',    login);
 router.post('/1/user/register', register);
 
+router.post('/1/user_role', create_user_role);
+
+router.get('/1/user_role/:user_role_id', get_user_role);
+router.put('/1/user_role/:user_role_id', update_user_role);
+router.delete('/1/user_role/:user_role_id', delete_user_role);
+
 function get_current(req, res) {
   const session_key = req.get('X-Yobs-User-Session-Key') || req.cookies.user_session_key;
   const sql = "SELECT user.* " +
@@ -30,6 +36,8 @@ function get_current(req, res) {
     if(error) {
       console.error("get_current error", error);
       res.sendStatus(500);
+    } else if(results.length < 1) {
+      res.sendStatus(404);
     } else {
       res.status(200).send(results[0]);
     }
@@ -116,6 +124,7 @@ function register(req, res) {
   const email = req.body.email;
   const password = req.body.password;
   const user_type = req.body.user_type;
+  const user_role_id = req.body.user_role_id;
 
   if(user_type && USER_TYPES.indexOf(user_type) < 0) {
     res.status(400).send('Invalid user type');
@@ -148,8 +157,8 @@ function register(req, res) {
       });
     },
     (done) => {
-      const sql = "INSERT INTO user (email, password, user_type) VALUES (?, ?, ?)";
-      const values = [email, pw_hash];
+      const sql = "INSERT INTO user (email, password, user_type, user_role_id) VALUES (?)";
+      const values = [email, pw_hash, user_type, user_role_id];
       db.connectAndQuery({sql, values}, (error, results) => {
         if(error) {
           console.error("register error", error);
@@ -186,6 +195,126 @@ function register(req, res) {
     } else if(error || !session_key) {
       res.sendStatus(500);
     }
-    res.status(200).send(session_key);
+    res.status(201).send(session_key);
   })
+}
+
+function create_user_role(req, res) {
+  const sql = "INSERT INTO user_role (user_role_name, user_role_descr) VALUES (?)";
+  const values = [req.body.name, req.body.type];
+  db.connectAndQuery({sql, values}, (error, results) => {
+    if(error) {
+      console.error("create_user_role: sql err:", error);
+      res.sendStatus(500);
+    } else {
+      res.status(201).send(results.insertId);
+    }
+  });
+}
+function get_user_role(req, res) {
+  const sql = "SELECT * FROM user_role WHERE user_role_id = ?";
+  const values = [req.body.user_role_id];
+  db.connectAndQuery({sql, values}, (error, results) => {
+    if(error) {
+      console.error("create_user_role: sql err:", error);
+      res.sendStatus(500);
+    } else if(results.length < 1) {
+      res.sendStatus(404);
+    } else {
+      res.status(200).send(results[0]);
+    }
+  });
+}
+function update_user_role(req, res) {
+  const arg_map = {
+    user_role_descr: req.body.type,
+    user_role_name: req.body.name,
+  };
+  const sql = "UPDATE user_role SET ? WHERE user_role_id = ?";
+  const values = [arg_map, req.params.user_role_id];
+  db.connectAndQuery({sql, values}, (error, results) => {
+    if(error) {
+      console.error("update_user_role: sql err:", error);
+      res.sendStatus(500);
+    } else if(results.affectedRows < 0) {
+      res.sendStatus(404);
+    } else {
+      res.status(200);
+    }
+  });
+
+}
+function delete_user_role(req, res) {
+  const sql = "DELETE FROM user_role WHERE user_role_id = ?";
+  const values = [req.params.user_role_id];
+  db.connectAndQuery({sql, values}, (error, results) => {
+    if(error) {
+      console.error("delete_user_role: sql err:", error);
+      res.sendStatus(500);
+    } else if(results.affectedRows < 0) {
+      res.sendStatus(404);
+    } else {
+      res.status(200);
+    }
+  });
+}
+
+function create_user_type(req, res) {
+  const sql = "INSERT INTO user_type (user_type_name, user_type_descr) VALUES (?)";
+  const values = [req.body.name, req.body.type];
+  db.connectAndQuery({sql, values}, (error, results) => {
+    if(error) {
+      console.error("create_user_type: sql err:", error);
+      res.sendStatus(500);
+    } else {
+      res.status(201).send(results.insertId);
+    }
+  });
+}
+function get_user_type(req, res) {
+  const sql = "SELECT * FROM user_type WHERE user_type_id = ?";
+  const values = [req.body.user_type_id];
+  db.connectAndQuery({sql, values}, (error, results) => {
+    if(error) {
+      console.error("create_user_type: sql err:", error);
+      res.sendStatus(500);
+    } else if(results.length < 1) {
+      res.sendStatus(404);
+    } else {
+      res.status(200).send(results[0]);
+    }
+  });
+}
+function update_user_type(req, res) {
+  const arg_map = {
+    user_type_descr: req.body.type,
+    user_type_name: req.body.name,
+  };
+  const sql = "UPDATE user_type SET ? WHERE user_type_id = ?";
+  const values = [arg_map, req.params.user_type_id];
+  db.connectAndQuery({sql, values}, (error, results) => {
+    if(error) {
+      console.error("update_user_type: sql err:", error);
+      res.sendStatus(500);
+    } else if(results.affectedRows < 0) {
+      res.sendStatus(404);
+    } else {
+      res.status(200);
+    }
+  });
+
+}
+function delete_user_type(req, res) {
+  const sql = "DELETE FROM user_type WHERE user_type_id = ?";
+  const values = [req.params.user_type_id];
+  db.connectAndQuery({sql, values}, (error, results) => {
+    if(error) {
+      console.error("delete_user_type: sql err:", error);
+      res.sendStatus(500);
+    } else if(results.affectedRows < 0) {
+      res.sendStatus(404);
+    } else {
+      res.status(200);
+    }
+  });
 }

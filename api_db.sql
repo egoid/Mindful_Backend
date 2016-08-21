@@ -54,14 +54,6 @@ CREATE TABLE user_role (
   UNIQUE KEY un_user_role_descr (user_role_descr)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
-CREATE TABLE user_type (
-  user_type_id int not null auto_increment,
-  user_type_name varchar(255),
-  user_type_descr varchar(255),
-  PRIMARY KEY (user_type_id),
-  UNIQUE KEY un_user_type_descr (user_type_descr)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
-
 CREATE TABLE company (
   company_id INT NOT NULL AUTO_INCREMENT,
   name varchar(255),
@@ -171,7 +163,6 @@ CREATE TABLE user (
   user_type ENUM('employee', 'employer free', 'employer_paid_1', 'employer_paid_2') DEFAULT 'employee',
   email varchar(255),
   password varchar(255),
-  user_type_id int,
   user_role_id int,
   facebook_id int,
   linkedin_id int,
@@ -184,7 +175,6 @@ CREATE TABLE user (
   created_at DATETIME,
   PRIMARY KEY (user_id),
   CONSTRAINT user_role FOREIGN KEY (user_role_id) REFERENCES user_role (user_role_id) ON UPDATE CASCADE ON DELETE CASCADE,
-  CONSTRAINT user_type FOREIGN KEY (user_type_id) REFERENCES user_type (user_type_id) ON UPDATE CASCADE ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 CREATE TABLE employee (

@@ -15,7 +15,7 @@ const util = require('../../util.js');
 const router = new express.Router();
 exports.router = router;
 
-router.get('/1/companies', get_companies);
+router.get('/1/company', get_companies);
 router.get('/1/company/:company_id', get_company);
 router.post('/1/company', create_company);
 
@@ -82,7 +82,7 @@ function create_company(req, res) {
       const values = [company_def.name];
       db.connectAndQuery({sql , values}, (error, results) => {
         if(error) {
-          console.error("create_company SQL error: " + error);
+          console.error("create_company: sql err: " + error);
         } else if(results[0] && results[0].company_id) {
           company_id = results[0].company_id;
         }
@@ -121,6 +121,8 @@ function get_company(req, res) {
   db.connectAndQuery({sql, values}, (error, results) => {
     if(error) {
       res.sendStatus(500);
+    } else if(results.length < 1) {
+      res.sendStatus(404);
     } else {
       res.status(200).send(results[0]);
     }

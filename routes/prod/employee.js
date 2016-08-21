@@ -32,10 +32,10 @@ router.get('/1/employee/:employee_id/skill', get_employee_skill_by_employee);
 router.get('/1/employee/:employee_id/schedule', get_employee_sched_by_employee);
 router.get('/1/employee/:employee_id/experience', get_employee_experience_by_employee);
 
-router.post('/1/employee/:employee_id/job', add_employee_job);
-router.post('/1/employee/:employee_id/skill', add_employee_skill);
-router.post('/1/employee/:employee_id/schedule', add_employee_sched);
-router.post('/1/employee/:employee_id/experience', add_employee_experience);
+router.post('/1/employee/:employee_id/job', create_employee_job);
+router.post('/1/employee/:employee_id/skill', create_employee_skill);
+router.post('/1/employee/:employee_id/schedule', create_employee_sched);
+router.post('/1/employee/:employee_id/experience', create_employee_experience);
 
 router.get('/1/experience/:experience_id', get_employee_experience)
 router.delete('/1/experience/:experience_id', delete_employee_experience);
@@ -63,6 +63,8 @@ function get_employee(req, res) {
     if(error) {
       console.error("get_employee: sql err:", error);
       res.sendStatus(500);
+    } else if(results.length < 1) {
+      res.sendStatus(404);
     } else {
       res.status(200).send(results[0]);
     }
@@ -209,6 +211,8 @@ function get_employee_jobs_by_employee(req, res) {
     if(error) {
       console.error("get_employee_jobs_by_employee: sql err:", error);
       res.sendStatus(500);
+    } else if(results.length < 1) {
+      res.sendStatus(404);
     } else {
       res.status(200).send(results);
     }
@@ -221,6 +225,8 @@ function get_employee_skill_by_employee(req, res) {
     if(error) {
       console.error("get_employee_skill_by_employee: sql err:", error);
       res.sendStatus(500);
+    } else if(results.length < 1) {
+      res.sendStatus(404);
     } else {
       res.status(200).send(results);
     }
@@ -233,6 +239,8 @@ function get_employee_sched_by_employee(req, res) {
     if(error) {
       console.error("get_employee_sched_by_employee: sql err:", error);
       res.sendStatus(500);
+    } else if(results.length < 1) {
+      res.sendStatus(404);
     } else {
       res.status(200).send(results);
     }
@@ -245,6 +253,8 @@ function get_employee_experience_by_employee(req, res) {
     if(error) {
       console.error("get_employee_experience_by_employee: sql err:", error);
       res.sendStatus(500);
+    } else if(results.length < 1) {
+      res.sendStatus(404);
     } else {
       res.status(200).send(results);
     }
@@ -259,12 +269,14 @@ function get_employee_sched(req, res) {
     if(error) {
       console.error("get_employee_sched: sql err:", error);
       res.sendStatus(500);
+    } else if(results.length < 1) {
+      res.sendStatus(404);
     } else {
-      res.status(200).send(results);
+      res.status(200).send(results[0]);
     }
   });
 }
-function add_employee_sched(req, res) {
+function create_employee_sched(req, res) {
   const employee_id = req.params.employee_id;
   if(!req.body.schedule || req.body.schedule.length < 7) {
     res.status(400).send('Seven day schedule required.');
@@ -350,12 +362,14 @@ function get_employee_experience(req, res) {
     if(error) {
       console.error("get_employee_experience: sql err:", error);
       res.sendStatus(500);
+    } else if(results.length < 1) {
+      res.sendStatus(404);
     } else {
-      res.status(200).send(results);
+      res.status(200).send(results[0]);
     }
   });
 }
-function add_employee_experience(req, res) {
+function create_employee_experience(req, res) {
   const employee_id = req.params.employee_id;
 
   if(!req.body.company || !req.body.job_role_id || !req.body.start_date) {
@@ -403,12 +417,14 @@ function get_employee_job(req, res) {
     if(error) {
       console.error("get_employee_job: sql err:", error);
       res.sendStatus(500);
+    } else if(results.length < 1) {
+      res.sendStatus(404);
     } else {
-      res.status(200).send(results);
+      res.status(200).send(results[0]);
     }
   });
 }
-function add_employee_job(req, res) {
+function create_employee_job(req, res) {
   const employee_id = req.params.employee_id;
   const job_id = req.body.job_id;
   const interview_date = req.body.interview_date;
@@ -424,7 +440,7 @@ function add_employee_job(req, res) {
 
   db.connectAndQuery({sql, values}, (error, results) => {
     if(error) {
-      console.error("add_employee_job: sql err:", error);
+      console.error("create_employee_job: sql err:", error);
       res.sendStatus(500);
     } else {
       res.status(201).send(results.insertId);
@@ -476,12 +492,14 @@ function get_employee_skill(req, res) {
     if(error) {
       console.error("get_employee_skill: sql err:", error);
       res.sendStatus(500);
+    } else if(results.length < 1) {
+      res.sendStatus(404);
     } else {
-      res.status(200).send(results);
+      res.status(200).send(results[0]);
     }
   });
 }
-function add_employee_skill(req, res) {
+function create_employee_skill(req, res) {
   const employee_id = req.params.employee_id;
   const skill_type_id = req.body.skill_type_id;
 
@@ -490,7 +508,7 @@ function add_employee_skill(req, res) {
 
   db.connectAndQuery({sql, values}, (error, results) => {
     if(error) {
-      console.error("add_employee_skill: sql err:", error);
+      console.error("create_employee_skill: sql err:", error);
       res.sendStatus(500);
     } else {
       res.sendStatus(200);

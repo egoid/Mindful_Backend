@@ -4,6 +4,24 @@
 * Put is "UPDATE" and can return 200, 400, 404, or 500
 * Delete is "DELETE" and can return 200, 4004, or 500
 
+# User Endpoints #
+* post - '/1/user/register'
+** user_type is one of ['employee','employer free','employer_paid_1','employer_paid_2']
+* get - '/1/user/current'
+
+# User Role Endpoints #
+* post - '/1/user_role'
+* get - '/1/user_role/:user_role_id'
+* put - '/1/user_role/:user_role_id'
+* delete - '/1/user_role/:user_role_id'
+
+# Login Endpoint #
+* post - '/1/user/login'
+
+# Company Endpoints #
+* post - '/1/company'
+* get - '/1/company/:company_id', get_company);
+
 # Single Job Endpoints #
 * post - '/1/job'
 * get - '/1/job/:job_id'
@@ -56,6 +74,9 @@
 * get - '/1/employee_schedule/:employee_sched_id'
 * put - '/1/employee_schedule/:employee_sched_id'
 * delete - '/1/employee_schedule/:employee_sched_id'
+
+# Get List of Companies *
+* get - '/1/company'
 
 # Get List of Jobs #
 * get - '/1/employee/:employee_id/job'
