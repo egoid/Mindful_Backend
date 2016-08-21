@@ -29,16 +29,16 @@
 * get - '/1/employee_skill/:employee_skill_id'
 * delete - '/1/employee_skill/:employee_skill_id'
 
-# Get List of Job by Employee #
+# Get List of Jobs by Employee #
 * get - '/1/employee/:employee_id/job'
 
 # Get List of Skills by Employee #
 * get - '/1/employee/:employee_id/skill'
 
-# Get List of Schedule by Employee #
+# Get List of Schedules by Employee #
 * get - '/1/employee/:employee_id/schedule'
 
-# Get List of Experience by Employee #
+# Get List of Experiences by Employee #
 * get - '/1/employee/:employee_id/experience'
 
 # Job Search #
