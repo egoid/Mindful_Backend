@@ -20,7 +20,9 @@ const GOOGLE_GEO_CONFIG = {
 };
 const geocoder = NodeGeocoder(GOOGLE_GEO_CONFIG);
 
-router.get('/1/jobs', get_jobs);
+router.get('/1/jobs', search_job);
+router.post('/1/jobs', search_job);
+
 router.post('/1/job', create_job);
 router.put('/1/job/:job_id', update_job);
 router.delete('/1/job/:job_id', delete_job);
@@ -523,12 +525,20 @@ function delete_job(req, res) {
   });
 }
 
-function get_jobs(req, res) {
+function search_job(req, res) {
   const search_location = req.body.location || req.query.location;
-  const search_radius_label = req.body.radius || req.query.radius;
+  const search_string = req.body.search || req.query.search;
+  const search_industry = req.body.industry_id || req.query.industry_id;
+
+  let search_radius_label = req.body.radius || req.query.radius;
+
   let search_lat;
   let search_long;
   let search_formatted;
+
+  if(LABEL_TO_RADIUS.indexOf(search_radius_label) < 0) {
+    search_radius_label = 'bike';
+  }
 
   async.series([
     (done) => {
@@ -540,13 +550,13 @@ function get_jobs(req, res) {
           done();
         })
         .catch((err) => {
-          console.error("get_jobs: geocoding err:", err);
+          console.error("search_job: geocoding err:", err);
           done(err);
         });
     },
     (done) => {
-      const values = [search_lat, search_lat, search_long, search_long];
-      const sql = "SELECT job.*, company.* , industry.*, job_role.*, job_type.*, job_skill.*, skill_type.* " +
+      let values = [search_lat, search_lat, search_long, search_long];
+      let sql = "SELECT job.*, company.* , industry.*, job_role.*, job_type.*, job_skill.*, skill_type.* " +
                   "FROM job " +
                   "JOIN company USING(company_id) " +
                   "JOIN industry USING(industry_id) " +
@@ -560,10 +570,19 @@ function get_jobs(req, res) {
                   "longitude_lower_" + search_radius_label + " >= ? AND " +
                   "longitude_upper_" + search_radius_label + " <= ?";
 
+      if(search_industry >= 1) {
+        sql += " AND industry.industry_id = ?";
+        values.push(search_industry);
+      }
+      if(search_string) {
+        sql += " AND job.title LIKE ?";
+        values.push(search_string);
+      }
+
       db.connectAndQuery({sql, values}, (error, results) => {
         let result;
         if(error) {
-          console.error("get_jobs: sql err:", error);
+          console.error("search_job: sql err:", error);
         } else {
           result = _make_job_from_results(results);
         }

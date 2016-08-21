@@ -202,4 +202,8 @@
 * get - '/1/employee/:employee_id/tipi'
 
 # Job Search #
-* get - '/1/jobs'
+* get|post - '/1/jobs'
+    * location (REQUIRED - an address as a string)
+    * radius (a radius label: ['walk', 'bike', 'metro', 'car'] - default 'bike')
+    * search (a string to search)
+    * industry_id (an industry to restrict jobs)
