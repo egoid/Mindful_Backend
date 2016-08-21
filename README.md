@@ -3,6 +3,7 @@
 * Post is "CREATE" and should always return an ID. It can return a 201, 400, or 500
 * Put is "UPDATE" and can return 200, 400, 404, or 500
 * Delete is "DELETE" and can return 200, 4004, or 500
+* Single "GET" endpoints should return objects not a list with only one item
 
 # User Endpoints #
 * post - '/1/user/register'
