@@ -27,10 +27,11 @@ router.get('/1/employee/:employee_id', get_employee);
 router.put('/1/employee/:employee_id', update_employee);
 
 /*** GET Jobs, Skills, Schedule, and Experience by Employee ID **/
-router.get('/1/employee/:employee_id/job', get_employee_jobs_by_employee);
-router.get('/1/employee/:employee_id/skill', get_employee_skill_by_employee);
-router.get('/1/employee/:employee_id/schedule', get_employee_sched_by_employee);
 router.get('/1/employee/:employee_id/experience', get_employee_experience_by_employee);
+router.get('/1/employee/:employee_id/job', get_employee_jobs_by_employee);
+router.get('/1/employee/:employee_id/schedule', get_employee_sched_by_employee);
+router.get('/1/employee/:employee_id/skill', get_employee_skill_by_employee);
+router.get('/1/employee/:employee_id/tipi', get_employee_tipi_by_employee);
 
 router.post('/1/employee/:employee_id/job', create_employee_job);
 router.post('/1/employee/:employee_id/skill', create_employee_skill);
@@ -119,7 +120,7 @@ function create_employee(req, res) {
           transportation, tipi_score_id, headline, school_level, gpa, schedule_id
         ];
 
-        db.connectAndQuery({sql, values}, (error, results) {
+        db.connectAndQuery({sql, values}, (error, results) => {
           if(error) {
             console.error("create_employee: sql err:", error);
           } else {
@@ -252,6 +253,20 @@ function get_employee_experience_by_employee(req, res) {
   db.connectAndQuery({sql, values}, (error, results) => {
     if(error) {
       console.error("get_employee_experience_by_employee: sql err:", error);
+      res.sendStatus(500);
+    } else if(results.length < 1) {
+      res.sendStatus(404);
+    } else {
+      res.status(200).send(results);
+    }
+  });
+}
+function get_employee_tipi_by_employee(req, res) {
+  const sql = "SELECT * FROM tipi_score WHERE employee_id = ?";
+  const values = [req.params.employee_id];
+  db.connectAndQuery({sql, values}, (error, results) => {
+    if(error) {
+      console.error("get_employee_tipi_by_employee: sql err:", error);
       res.sendStatus(500);
     } else if(results.length < 1) {
       res.sendStatus(404);
@@ -458,7 +473,7 @@ function update_employee_job(req, res) {
 
   const sql = "UPDATE employee_job SET status = ?, interview_date = ? WHERE employee_job_id = ?";
   const values = [job_status, interview_date, employee_job_id];
-  db.connectAndQuery({sql, values}, (error, results) {
+  db.connectAndQuery({sql, values}, (error, results) => {
     if(error) {
       console.error("update_employee_job: sql err:", error);
       res.sendStatus(500);

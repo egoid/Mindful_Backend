@@ -2,8 +2,6 @@
 
 const _ = require('lodash');
 const async = require('async');
-const config = require('node-config-sets');
-const ejs = require('ejs');
 const express = require('express');
 const NodeGeocoder = require('node-geocoder');
 

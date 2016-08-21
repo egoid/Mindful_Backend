@@ -2,10 +2,6 @@
 
 const _ = require('lodash');
 const async = require('async');
-const bcrypt = require('bcrypt');
-const crypto = require('crypto');
-const config = require('node-config-sets');
-const ejs = require('ejs');
 const express = require('express');
 
 const db = require('../../mysql_db_prod.js');
