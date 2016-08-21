@@ -44,24 +44,86 @@
 
 # Single Job Endpoints #
 * post - '/1/job'
+    * company
+        * id
+        * name
+        * industry
+            * id (optional)
+            * name => industry_name
+            * type => industry_type
+        * email_domain
+        * property_bag (JSON)
+    * job_role
+        * id (optional)
+        * name => job_role_name
+        * type => job_role_descr
+    * job_type
+        * id (optional)
+        * name => job_type_name
+        * type => job_type_descr
+    * name
+    * title
+    * employer_id
+    * location
+    * pay_rate_min
+    * pay_rate_max
+    * min_gpa
+    * description
+    * external_url
+    * posted_at
+    * takedown_at
 * get - '/1/job/:job_id'
 * put - '/1/job/:job_id'
+    * name
+    * title
+    * employer_id
+    * location
+    * pay_rate_min
+    * pay_rate_max
+    * min_gpa
+    * description
+    * external_url
+    * posted_at
+    * takedown_at
 * delete - '/1/job/:job_id'
 
 # Single Job Schedule Endpoints #
 * post - '/1/job/:job_id/schedule'
+    * schedule (list)
+        * Seven-item list, sunday is 0, each value should be one of ['all','none','morning','afternoon','evening','night']
 * get - '/1/job_schedule/:job_sched_id'
 * put - '/1/job_schedule/:job_sched_id'
+    * schedule (list)
+        * Seven-item list, sunday is 0, each value should be one of ['all','none','morning','afternoon','evening','night']
 * delete - '/1/job_schedule/:job_sched_id'
 
 # Single Job Skill Endpoints #
+* post - '/1/job/:job_id/skill'
+    * skill_type_id
 * get - '/1/job_skill/:job_skill_id'
 * delete - '/1/job_skill/:job_skill_id'
 
 # Single Employee Endpoints #
 * post - '/1/employee'
+    * user_id
+    * school_id
+    * location_name
+    * transportation ['walk','bike','metro','car']
+    * tipi_score_id
+    * headline
+    * school_level
+    * gpa
+    * schedule_id
 * get - '/1/employee/:employee_id'
 * put - '/1/employee/:employee_id'
+    * school_id
+    * location_name
+    * transportation ['walk','bike','metro','car']
+    * tipi_score_id
+    * headline
+    * school_level
+    * gpa
+    * schedule_id
 
 # Single Employer Endpoints #
 * post - '/1/employer'
