@@ -28,6 +28,7 @@ router.put('/1/employee/:employee_id', update_employee);
 
 /*** GET Jobs, Skills, Schedule, and Experience by Employee ID **/
 router.get('/1/employee/:employee_id/experience', get_employee_experience_by_employee);
+router.get('/1/employee/:employee_id/industry', get_employee_industry_by_employee);
 router.get('/1/employee/:employee_id/job', get_employee_jobs_by_employee);
 router.get('/1/employee/:employee_id/schedule', get_employee_sched_by_employee);
 router.get('/1/employee/:employee_id/skill', get_employee_skill_by_employee);
@@ -272,6 +273,23 @@ function get_employee_tipi_by_employee(req, res) {
       res.sendStatus(404);
     } else {
       res.status(200).send(results);
+    }
+  });
+}
+function get_employee_industry_by_employee(req, res) {
+  const sql = "SELECT industry.*, employee_interested_industry.* " +
+              "FROM employee_interested_industry " +
+              "WHERE employee_id = ?";
+  const values = [req.params.employee_id];
+
+  db.connectAndQuery({sql, values}, (error, results) => {
+    if(error) {
+      console.error("get_employee_industry_by_employee: sql err:", error);
+      res.sendStatus(500);
+    } else if(results.length < 1) {
+      res.sendStatus(404);
+    } else {
+      res.sendStatus(200);
     }
   });
 }

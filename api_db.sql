@@ -177,6 +177,16 @@ CREATE TABLE user (
   CONSTRAINT user_role FOREIGN KEY (user_role_id) REFERENCES user_role (user_role_id) ON UPDATE CASCADE ON DELETE CASCADE,
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
+CREATE TABLE employer (
+  employer_id int not null AUTO_INCREMENT,
+  user_id int not null,
+  location_name text,
+  location_latitude FLOAT,
+  location_longitude FLOAT,
+  PRIMARY KEY (employer_id)
+  CONSTRAINT user FOREIGN KEY (user_id) REFERENCES user (user_id) ON UPDATE CASCADE ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
 CREATE TABLE employee (
   employee_id int not null AUTO_INCREMENT,
   user_id int not null,
@@ -191,16 +201,18 @@ CREATE TABLE employee (
   gpa float,
   video_url text,
   schedule_id int,
-  PRIMARY KEY (employee_id)
+  PRIMARY KEY (employee_id),
+  CONSTRAINT user FOREIGN KEY (user_id) REFERENCES user (user_id) ON UPDATE CASCADE ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
-CREATE TABLE employer (
-  employer_id int not null AUTO_INCREMENT,
-  user_id int not null,
-  location_name text,
-  location_latitude FLOAT,
-  location_longitude FLOAT,
-  PRIMARY KEY (employer_id)
+CREATE TABLE employee_interested_industry (
+  employee_industry_id int not null AUTO_INCREMENT,
+  employee_id int,
+  industry_id int,
+  PRIMARY KEY (employee_industry_id),
+  UNIQUE KEY employee_and_industry (employee_id, industry_id),
+  CONSTRAINT industry FOREIGN KEY (industry_id) REFERENCES industry (industry_id) ON UPDATE CASCADE ON DELETE CASCADE,
+  CONSTRAINT employee FOREIGN KEY (employee_id) REFERENCES employee (employee_id) ON UPDATE CASCADE ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 CREATE TABLE employee_job (
@@ -211,7 +223,9 @@ CREATE TABLE employee_job (
   interview_date DATETIME,
   modified_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (employee_job_id),
-  UNIQUE KEY employee_and_job (employee_id, job_id)
+  UNIQUE KEY employee_and_job (employee_id, job_id),
+  CONSTRAINT job FOREIGN KEY (job_id) REFERENCES job (job_id) ON UPDATE CASCADE ON DELETE CASCADE,
+  CONSTRAINT employee FOREIGN KEY (employee_id) REFERENCES employee (employee_id) ON UPDATE CASCADE ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 CREATE TABLE employee_skill (
@@ -219,16 +233,8 @@ CREATE TABLE employee_skill (
   employee_id int,
   skill_type_id int,
   PRIMARY KEY(employee_skill_id),
-  UNIQUE KEY employee_and_skill (employee_id, skill_type_id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
-
-CREATE TABLE school (
-  school_id int not null AUTO_INCREMENT,
-  name text,
-  location_name text,
-  location_latitude float,
-  location_longitude float,
-  PRIMARY KEY(school_id)
+  UNIQUE KEY employee_and_skill (employee_id, skill_type_id),
+  CONSTRAINT employee FOREIGN KEY (employee_id) REFERENCES employee (employee_id) ON UPDATE CASCADE ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 CREATE TABLE employee_experience (
@@ -238,18 +244,9 @@ CREATE TABLE employee_experience (
   job_role_id int,
   start_date DATETIME,
   end_date DATETIME,
-  PRIMARY KEY(employee_experience_id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
-
-CREATE TABLE tipi_score (
-  tipi_score_id int not null AUTO_INCREMENT,
-  employee_id int,
-  extraversion float,
-  agreeableness float,
-  conscientiousness float,
-  emotional_stability float,
-  openness_to_experiences float,
-  PRIMARY KEY(tipi_score_id)
+  PRIMARY KEY(employee_experience_id),
+  CONSTRAINT employee FOREIGN KEY (employee_id) REFERENCES employee (employee_id) ON UPDATE CASCADE ON DELETE CASCADE,
+  CONSTRAINT job_role FOREIGN KEY (job_role_id) REFERENCES job_role (job_role_id) ON UPDATE CASCADE ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 CREATE TABLE employee_schedule (
@@ -262,7 +259,29 @@ CREATE TABLE employee_schedule (
   thursday_schedule ENUM('all', 'none', 'morning', 'afternoon', 'evening', 'night'),
   friday_schedule ENUM('all', 'none', 'morning', 'afternoon', 'evening', 'night'),
   saturday_schedule ENUM('all', 'none', 'morning', 'afternoon', 'evening', 'night'),
-  PRIMARY KEY(employee_schedule_id)
+  PRIMARY KEY(employee_schedule_id),
+  CONSTRAINT employee FOREIGN KEY (employee_id) REFERENCES employee (employee_id) ON UPDATE CASCADE ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+CREATE TABLE school (
+  school_id int not null AUTO_INCREMENT,
+  name text,
+  location_name text,
+  location_latitude float,
+  location_longitude float,
+  PRIMARY KEY(school_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+CREATE TABLE tipi_score (
+  tipi_score_id int not null AUTO_INCREMENT,
+  employee_id int,
+  extraversion float,
+  agreeableness float,
+  conscientiousness float,
+  emotional_stability float,
+  openness_to_experiences float,
+  PRIMARY KEY(tipi_score_id),
+  CONSTRAINT employee FOREIGN KEY (employee_id) REFERENCES employee (employee_id) ON UPDATE CASCADE ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 CREATE TABLE job_schedule (
@@ -275,5 +294,6 @@ CREATE TABLE job_schedule (
   thursday_schedule ENUM('all', 'none', 'morning', 'afternoon', 'evening', 'night'),
   friday_schedule ENUM('all', 'none', 'morning', 'afternoon', 'evening', 'night'),
   saturday_schedule ENUM('all', 'none', 'morning', 'afternoon', 'evening', 'night'),
-  PRIMARY KEY(job_schedule_id)
+  PRIMARY KEY(job_schedule_id),
+  CONSTRAINT job FOREIGN KEY (job_id) REFERENCES job (job_id) ON UPDATE CASCADE ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;

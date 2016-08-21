@@ -177,14 +177,20 @@
 * get - '/1/employee/:employee_id/job'
 * get - '/1/employer/:employer_id/job'
 
-# Get List of Skills by Employee #
-* get - '/1/employee/:employee_id/skill'
+# Get List of Experiences by Employee #
+* get - '/1/employee/:employee_id/experience'
+
+# Get List of Industries of Interest for Employee #
+* get - '/1/employee/:employee_id/industry'
 
 # Get List of Schedules by Employee #
 * get - '/1/employee/:employee_id/schedule'
 
-# Get List of Experiences by Employee #
-* get - '/1/employee/:employee_id/experience'
+# Get List of Skills by Employee #
+* get - '/1/employee/:employee_id/skill'
+
+# Get TIPI Score for Employee #
+* get - '/1/employee/:employee_id/tipi'
 
 # Job Search #
 * get - '/1/jobs'
