@@ -7,7 +7,7 @@
 
 # User Endpoints #
 * post - '/1/user/register'
-  * user_type is one of ['employee','employer free','employer_paid_1','employer_paid_2']
+    * user_type is one of ['employee','employer free','employer_paid_1','employer_paid_2']
 * get - '/1/user/current'
 
 # User Role Endpoints #
