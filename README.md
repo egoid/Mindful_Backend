@@ -127,34 +127,47 @@
 
 # Single Employer Endpoints #
 * post - '/1/employer'
+    * user_id
+    * location_name
 * get - '/1/employer/:employer_id'
 * put - '/1/employer/:employer_id'
+    * location_name
 * delete - '/1/employer/:employer_id'
 
 # Single Employee Experience Endpoints #
 * post - '/1/employee/:employee_id/experience'
+    * company
+    * job_role_id
+    * start (DATETIME)
+    * end (DATETIME)
 * get - '/1/experience/:experience_id'
 * delete - '/1/experience/:experience_id'
 
-# Single Employee Experience Endpoints #
+# Single Employee Job Endpoints #
 * post - '/1/employee/:employee_id/job'
+    * job_id
+    * interview_date (DATETIME)
+    * status ['saved','submitted','reviewed','interview','offer','pass']
 * get - '/1/employee_job/:employee_job_id'
+* put - '/1/employee_job/:employee_job_id'
+    * interview_date (DATETIME)
+    * status ['saved','submitted','reviewed','interview','offer','pass']
 * delete - '/1/employee_job/:employee_job_id'
-
-# Single Employee Role Endpoints #
-* post - '/1/employee/:employee_id/role'
-* get - '/1/employee_role/:employee_role_id'
-* delete - '/1/employee_role/:employee_role_id'
 
 # Single Employee Skill Endpoints #
 * post - '/1/employee/:employee_id/skill'
+    * skill_type_id
 * get - '/1/employee_skill/:employee_skill_id'
 * delete - '/1/employee_skill/:employee_skill_id'
 
 # Single Employee Schedule Endpoints #
 * post - '/1/employee/:employee_id/schedule'
+    * schedule (list)
+        * Seven-item list, sunday is 0, each value should be one of ['all','none','morning','afternoon','evening','night']
 * get - '/1/employee_schedule/:employee_sched_id'
 * put - '/1/employee_schedule/:employee_sched_id'
+    * schedule (list)
+        * Seven-item list, sunday is 0, each value should be one of ['all','none','morning','afternoon','evening','night']
 * delete - '/1/employee_schedule/:employee_sched_id'
 
 # Get List of Companies *

@@ -435,7 +435,7 @@ function create_employee_job(req, res) {
   }
 
   const sql = "INSERT INTO employee_role " +
-              "(employee_id, job_id, status, interview_date) VALUES (?,?,?,?)";
+              "(employee_id, job_id, status, interview_date) VALUES (?)";
   const values = [employee_id, job_id, job_status, interview_date];
 
   db.connectAndQuery({sql, values}, (error, results) => {
