@@ -1,3 +1,9 @@
+# General Principles #
+* Get is "READ" and can return 200, 404, or 500
+* Post is "CREATE" and should always return an ID. It can return a 201, 400, or 500
+* Put is "UPDATE" and can return 200, 400, 404, or 500
+* Delete is "DELETE" and can return 200, 4004, or 500
+
 # Single Job Endpoints #
 * post - '/1/job'
 * get - '/1/job/:job_id'
@@ -9,6 +15,10 @@
 * get - '/1/job_schedule/:job_sched_id'
 * put - '/1/job_schedule/:job_sched_id'
 * delete - '/1/job_schedule/:job_sched_id'
+
+# Single Job Skill Endpoints #
+* get - '/1/job_skill/:job_skill_id'
+* delete - '/1/job_skill/:job_skill_id'
 
 # Single Employee Endpoints #
 * post - '/1/employee'

@@ -158,6 +158,8 @@ function delete_employer(req, res) {
     if(error) {
       console.error("delete_employer: sql err:", error);
       res.sendStatus(500);
+    } else if(results.affectedRows < 1) {
+      res.sendStatus(404);
     } else {
       res.status(200).send(results[0]);
     }

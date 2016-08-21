@@ -334,6 +334,8 @@ function delete_employee_sched(req, res) {
     if(error) {
       console.error("delete_employee_sched: sql err:", error);
       res.sendStatus(500);
+    } else if(results.affectedRows < 1) {
+      res.sendStatus(404);
     } else {
       res.sendStatus(200);
     }
@@ -385,6 +387,8 @@ function delete_employee_experience(req, res) {
     if(error) {
       console.error("delete_employee_experience: sql err:", error);
       res.sendStatus(500);
+    } else if(results.affectedRows < 1) {
+      res.sendStatus(404);
     } else {
       res.sendStatus(200);
     }
@@ -456,6 +460,8 @@ function delete_employee_job(req, res) {
     if(error) {
       console.error("delete_employee_job: sql err:", error);
       res.sendStatus(500);
+    } else if(results.affectedRows < 1) {
+      res.sendStatus(404);
     } else {
       res.sendStatus(200);
     }
@@ -464,7 +470,7 @@ function delete_employee_job(req, res) {
 
 /**** EMPLOYEE SKILL ENDPOINTS ****/
 function get_employee_skill(req, res) {
-  const sql = "SELECT * FROM employee_skill WHERE employee_role_id = ?";
+  const sql = "SELECT * FROM employee_skill WHERE employee_skill_id = ?";
   const values = [req.params.employee_skill_id];
   db.connectAndQuery({sql, values}, (error, results) => {
     if(error) {
@@ -498,6 +504,8 @@ function delete_employee_skill(req, res) {
     if(error) {
       console.error("delete_employee_skill: sql err:", error);
       res.sendStatus(500);
+    } else if(results.affectedRows < 1) {
+      res.sendStatus(404);
     } else {
       res.sendStatus(200);
     }

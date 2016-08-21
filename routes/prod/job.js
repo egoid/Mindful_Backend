@@ -28,11 +28,15 @@ router.put('/1/job/:job_id', update_job);
 router.delete('/1/job/:job_id', delete_job);
 router.get('/1/job/:job_id', get_job);
 
-router.post('/1/job/:job_id/schedule', add_job_sched);
+router.post('/1/job/:job_id/schedule', create_job_sched);
+router.post('/1/job/:job_id/skill', create_job_skill);
 
 router.get('/1/job_schedule/:job_sched_id', get_job_sched);
 router.put('/1/job_schedule/:job_sched_id', update_job_sched);
 router.delete('/1/job_schedule/:job_sched_id', delete_job_sched);
+
+router.get('/1/job_skill/:job_skill_id', get_job_skill)
+router.delete('/1/job_skill/:job_skill_id', delete_job_skill);
 
 const JOB_KEYS = [
   'job_id',
@@ -440,32 +444,20 @@ function create_job(req, res) {
         if(error) {
           console.error("create_job: sql err:", error);
         }
-        done(error);
+        done(error, results.insertId);
       });
     },
     (done) => {
       db.commit(connection, done);
     },
   ],
-  (error) => {
+  (error, result) => {
     if(error) {
       db.rollback(connection, () => {});
       console.error("create_job: sql err:", error);
       res.sendStatus(500);
     } else {
-      res.sendStatus(200);
-    }
-  });
-}
-function delete_job(req, res) {
-  const values = [req.params.job_id];
-  const sql = "DELETE FROM job WHERE job_id = ?";
-  db.connectAndQuery({sql, values}, (error, results) => {
-    if(error) {
-      console.error("delete_job: sql err:", error);
-      res.sendStatus(500);
-    } else {
-      res.sendStatus(200);
+      res.status(201).send(result);
     }
   });
 }
@@ -515,6 +507,20 @@ function update_job(req, res) {
       }
     });
   }
+}
+function delete_job(req, res) {
+  const values = [req.params.job_id];
+  const sql = "DELETE FROM job WHERE job_id = ?";
+  db.connectAndQuery({sql, values}, (error, results) => {
+    if(error) {
+      console.error("delete_job: sql err:", error);
+      res.sendStatus(500);
+    } else if(results.affectedRows < 1) {
+      res.sendStatus(404);
+    } else {
+      res.sendStatus(200);
+    }
+  });
 }
 
 function get_jobs(req, res) {
@@ -586,7 +592,7 @@ function get_job_sched(req, res) {
     }
   });
 }
-function add_job_sched(req, res) {
+function create_job_sched(req, res) {
   const job_id = req.params.job_id;
   if(!req.body.schedule || req.body.schedule.length < 7) {
     res.status(400).send('Seven day schedule required.');
@@ -656,6 +662,50 @@ function delete_job_sched(req, res) {
     if(error) {
       console.error("delete_job_sched: sql err:", error);
       res.sendStatus(500);
+    } else if(results.affectedRows < 1) {
+      res.sendStatus(404);
+    } else {
+      res.sendStatus(200);
+    }
+  });
+}
+
+function create_job_skill(req, res) {
+  const job_id = req.params.job_id;
+  const skill_type_id = req.body.skill_type_id;
+
+  const sql = "INSERT INTO job_skill (job_id, skill_type_id) VALUES (?,?)";
+  const values = [job_id, skill_type_id];
+  db.connectAndQuery({sql, values}, (error, results) => {
+    if(error) {
+      console.error("create_job_skill: sql err:", error);
+      res.sendStatus(500);
+    } else {
+      res.status(201).send(results.insertId);
+    }
+  });
+}
+function get_job_skill(req, res) {
+  const sql = "SELECT * FROM job_skill WHERE job_skill_id = ?";
+  const values = [req.params.job_skill_id];
+  db.connectAndQuery({sql, values}, (error, results) => {
+    if(error) {
+      console.error("get_job_skill: sql err:", error);
+      res.sendStatus(500);
+    } else {
+      res.status(200).send(results);
+    }
+  });
+}
+function delete_job_skill(req, res) {
+  const sql = "DELETE FROM job_skill WHERE job_skill_id = ?";
+  const values = [req.params.job_skill_id];
+  db.connectAndQuery({sql, values}, (error, results) => {
+    if(error) {
+      console.error("delete_job_skill: sql err:", error);
+      res.sendStatus(500);
+    } else if(results.affectedRows < 1) {
+      res.sendStatus(404);
     } else {
       res.sendStatus(200);
     }
