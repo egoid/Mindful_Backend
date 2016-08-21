@@ -14,7 +14,6 @@ const util = require('../../util.js');
 const router = new express.Router();
 exports.router = router;
 
-const SINGLE_JOB_URL = '/1/job/:job_id';
 const GOOGLE_GEO_CONFIG = {
   apiKey: 'AIzaSyAJwf4JXpI9MRGuZdYcOFT9-nq5lzbuPKI',
   formatter: null,
@@ -25,9 +24,15 @@ const geocoder = NodeGeocoder(GOOGLE_GEO_CONFIG);
 
 router.get('/1/jobs', get_jobs);
 router.post('/1/job', create_job);
-router.put(SINGLE_JOB_URL, update_job);
-router.delete(SINGLE_JOB_URL, delete_job);
-router.get(SINGLE_JOB_URL, get_job);
+router.put('/1/job/:job_id', update_job);
+router.delete('/1/job/:job_id', delete_job);
+router.get('/1/job/:job_id', get_job);
+
+router.post('/1/job/:job_id/schedule', add_job_sched);
+
+router.get('/1/job_schedule/:job_sched_id', get_job_sched);
+router.put('/1/job_schedule/:job_sched_id', update_job_sched);
+router.delete('/1/job_schedule/:job_sched_id', delete_job_sched);
 
 const JOB_KEYS = [
   'job_id',
@@ -91,6 +96,7 @@ const LABEL_TO_RADIUS = {
   metro: 8,
   car: 8
 };
+const SCHEDULE_VALUES = ['all','none','morning','afternoon','evening','night'];
 
 function _create_company(company_def, conn, all_done) {
   let industry_id;
@@ -103,7 +109,7 @@ function _create_company(company_def, conn, all_done) {
       (done) => {
         _create_industry(company_def.industry, conn, (error, result) => {
           if(error) {
-            console.error(error);
+            console.error("_create_company: sql err:", error);
           } else {
             industry_id = result;
           }
@@ -115,7 +121,7 @@ function _create_company(company_def, conn, all_done) {
         const values = [company_def.name];
         db.queryWithConnection(conn, sql , values, (error, results) => {
           if(error) {
-            console.error("_create_company SQL error: " + error);
+            console.error("_create_company: sql err:", error);
           } else if(results.length > 0) {
             company_id = results[0].company_id;
           }
@@ -128,7 +134,7 @@ function _create_company(company_def, conn, all_done) {
           const values = [company_def.name, industry_id, company_def.email_domain, JSON.stringify(company_def.property_bag)];
           db.queryWithConnection(conn, sql , values, (error, results) => {
             if(error) {
-              console.error("_create_company SQL error: " + error);
+              console.error("_create_company: sql err:", error);
             } else {
               company_id = results.insertId;
             }
@@ -155,7 +161,7 @@ function _create_job_role(role_def, conn, all_done) {
         const values = [role_def.type];
         db.queryWithConnection(conn, sql , values, (error, results) => {
           if(error) {
-            console.error("_create_job_role SQL error: " + error);
+            console.error("_create_job_role: sql err:", error);
           } else if(results.length > 0) {
             role_id = results[0].job_role_id;
           }
@@ -168,7 +174,7 @@ function _create_job_role(role_def, conn, all_done) {
           const values = [role_def.name, role_def.type];
           db.queryWithConnection(conn, sql, values, (error, results) => {
             if(error) {
-              console.error("_create_job_role SQL error: " + error);
+              console.error("_create_job_role: sql err:", error);
             } else {
               role_id = results.insertId;
             }
@@ -195,7 +201,7 @@ function _create_job_type(type_def, conn, all_done) {
         const values = [type_def.type];
         db.queryWithConnection(conn, sql , values, (error, results) => {
           if(error) {
-            console.error("_create_job_type SQL error: " + error);
+            console.error("_create_job_type: sql err:", error);
           } else if(results.length > 0) {
             type_id = results[0].job_type_id;
           }
@@ -208,7 +214,7 @@ function _create_job_type(type_def, conn, all_done) {
           const values = [type_def.name, type_def.type];
           db.queryWithConnection(conn, sql, values, (error, results) => {
             if(error) {
-              console.error("_create_job_type SQL error: " + error);
+              console.error("_create_job_type: sql err:", error);
             } else {
               type_id = results.insertId;
             }
@@ -235,7 +241,7 @@ function _create_industry(industry_def, conn, all_done) {
         const values = [industry_def.type];
         db.queryWithConnection(conn, sql , values, (error, results) => {
           if(error) {
-            console.error("_create_industry SQL error: " + error);
+            console.error("_create_industry: sql err:", error);
           } else if(results[0] && results[0].industry_id) {
             industry_id = results[0].industry_id;
           }
@@ -248,7 +254,7 @@ function _create_industry(industry_def, conn, all_done) {
           const values = [industry_def.name, industry_def.type];
           db.queryWithConnection(conn, sql, values, (error, results) => {
             if(error) {
-              console.error("_create_company SQL error: " + error);
+              console.error("_create_industry: sql err:", error);
             } else {
               industry_id = results.insertId;
             }
@@ -267,6 +273,7 @@ function _create_industry(industry_def, conn, all_done) {
 function _extract_job_def(req) {
   return {
     title: req.body.title,
+    employer_id: req.body.employer_id,
     location: req.body.location || null,
     pay_rate_min: req.body.pay_rate_min || null,
     pay_rate_max: req.body.pay_rate_max || null,
@@ -335,7 +342,7 @@ function create_job(req, res) {
     (done) => {
       db.getConnection((error, conn) => {
         if(error) {
-          console.error(error);
+          console.error("create_job: sql err:", error);
         }
         connection = conn;
         done(error);
@@ -344,7 +351,7 @@ function create_job(req, res) {
     (done) => {
       db.queryWithConnection(connection, "START TRANSACTION", [], (error) => {
         if(error) {
-          console.error(error);
+          console.error("create_job: sql err:", error);
         }
         done(error);
       });
@@ -352,7 +359,7 @@ function create_job(req, res) {
     (done) => {
       _create_company(company_def, connection, (error, result) => {
         if(error) {
-          console.error(error);
+          console.error("create_job: _create_company err:", error);
         } else {
           company_id = result;
         }
@@ -362,7 +369,7 @@ function create_job(req, res) {
     (done) => {
       _create_job_role(job_role, connection, (error, result) => {
         if(error) {
-          console.error(error);
+          console.error("create_job: _create_job_role err:", error);
         } else {
           job_role_id = result;
         }
@@ -372,7 +379,7 @@ function create_job(req, res) {
     (done) => {
       _create_job_type(job_type, connection, (error, result) => {
         if(error) {
-          console.error(error);
+          console.error("create_job: _create_job_type err:", error);
         } else {
           job_type_id = result;
         }
@@ -389,7 +396,7 @@ function create_job(req, res) {
             done();
           })
           .catch((err) => {
-            console.error(err);
+            console.error("create_job: geocoding err:", err);
             done(err);
           });
       } else {
@@ -431,7 +438,7 @@ function create_job(req, res) {
       const sql = "INSERT INTO job (" + columns.join(',') + ")" + " VALUES (" + "?,".repeat(values.length).slice(0,-1) + ")";
       db.queryWithConnection(connection, sql, values, (error, results) => {
         if(error) {
-          console.error("create_job SQL error: " + error);
+          console.error("create_job: sql err:", error);
         }
         done(error);
       });
@@ -443,7 +450,7 @@ function create_job(req, res) {
   (error) => {
     if(error) {
       db.rollback(connection, () => {});
-      console.error("create_job error: " + error);
+      console.error("create_job: sql err:", error);
       res.sendStatus(500);
     } else {
       res.sendStatus(200);
@@ -455,7 +462,7 @@ function delete_job(req, res) {
   const sql = "DELETE FROM job WHERE job_id = ?";
   db.connectAndQuery({sql, values}, (error, results) => {
     if(error) {
-      console.error("delete_job SQL error: " + error);
+      console.error("delete_job: sql err:", error);
       res.sendStatus(500);
     } else {
       res.sendStatus(200);
@@ -472,11 +479,9 @@ function get_job(req, res) {
               "LEFT JOIN job_skill USING(job_id) " +
               "LEFT JOIN skill_type ON job_skill.skill_type_id = skill_type.skill_type_id " +
               "WHERE job_id = ?";
-
-    console.log(sql);
     db.connectAndQuery({sql, values: [req.params.job_id]}, (error, results) => {
       if(error) {
-        console.error(error);
+        console.error("get_job: sql err:", error);
         res.sendStatus(500);
       } else {
         let result = _make_job_from_results(results);
@@ -503,7 +508,7 @@ function update_job(req, res) {
     const sql = "UPDATE job SET " + args.join(",");
     db.connectAndQuery({sql, values}, (error, results) => {
       if(error) {
-        console.error("update_job SQL error: " + error);
+        console.error("update_job: sql err:", error);
         res.sendStatus(500);
       } else {
         res.sendStatus(200);
@@ -529,7 +534,7 @@ function get_jobs(req, res) {
           done();
         })
         .catch((err) => {
-          console.error(err);
+          console.error("get_jobs: geocoding err:", err);
           done(err);
         });
     },
@@ -550,17 +555,109 @@ function get_jobs(req, res) {
                   "longitude_upper_" + search_radius_label + " <= ?";
 
       db.connectAndQuery({sql, values}, (error, results) => {
+        let result;
         if(error) {
-          console.error(error);
-          res.sendStatus(500);
+          console.error("get_jobs: sql err:", error);
         } else {
-          let result = _make_job_from_results(results);
-          res.status(200).send(result);
+          result = _make_job_from_results(results);
         }
+        done(error, result);
       });
     },
   ],
-  (error) => {
-    res.sendStatus(500);
+  (error, result) => {
+    if(error) {
+      res.sendStatus(500);
+    } else {
+      res.status(200).send(result);
+    }
+  });
+}
+
+function get_job_sched(req, res) {
+  const sql = "SELECT * FROM job_schedule WHERE job_schedule_id = ?";
+  const values = [req.params.job_schedule_id];
+  db.connectAndQuery({sql, values}, (error, results) => {
+    if(error) {
+      console.error("get_job_sched: sql err:", error);
+      res.sendStatus(500);
+    } else {
+      res.status(200).send(results);
+    }
+  });
+}
+function add_job_sched(req, res) {
+  const job_id = req.params.job_id;
+  if(!req.body.schedule || req.body.schedule.length < 7) {
+    res.status(400).send('Seven day schedule required.');
+  } else {
+    const values = [job_id];
+    const schedule = req.body.schedule;
+    _.each(schedule, (schedule_day) => {
+      if(SCHEDULE_VALUES.indexOf(schedule_day) < 0) {
+        values.push("none");
+      } else {
+        values.push(schedule_day);
+      }
+    });
+
+    const sql = "INSERT INTO job_schedule " +
+                "(job_id, sunday_schedule, monday_schedule, " +
+                " tuesday_schedule, wednesday_schedule, thursday_schedule, " +
+                " friday_schedule, saturday_schedule) VALUES "
+                "(?)";
+    db.connectAndQuery({sql, values}, (error, results) => {
+      if(error) {
+        consle.error(error);
+        res.sendStatus(500);
+      } else {
+        res.status(201).send(results.insertId);
+      }
+    });
+  }
+}
+function update_job_sched(req, res) {
+  const job_schedule_id = req.params.job_schedule_id;
+  if(!req.body.schedule || req.body.schedule.length < 7) {
+    res.status(400).send('Seven day schedule required.');
+  } else {
+    const arg_map = {};
+    const schedule = req.body.schedule;
+    const day_list = ['sunday_schedule', 'monday_schedule', 'tuesday_schedule',
+                      'wednesday_schedule', 'thursday_schedule', 'friday_schedule',
+                      'saturday_schedule'];
+    _.each(day_list, (day_column_name, i) => {
+      let schedule_day = schedule[i];
+      if(SCHEDULE_VALUES.indexOf(schedule_day) < 0) {
+        arg_map[day_column_name] = 'none';
+      } else {
+        arg_map[day_column_name] = schedule[i];
+      }
+    });
+
+    const sql = "UPDATE job_schedule SET ? WHERE job_schedule_id = ?";
+    const values = [arg_map, job_schedule_id];
+    db.connectAndQuery({sql, values}, (error, results) => {
+      if(error) {
+        console.error("update_job_sched: sql err:", error);
+        res.sendStatus(500);
+      } else if(results.affectedRows < 1) {
+        res.sendStatus(404);
+      } else {
+        res.sendStatus(200);
+      }
+    });
+  }
+}
+function delete_job_sched(req, res) {
+  const sql = "DELETE FROM job_schedule WHERE job_schedule_id = ?";
+  const values = [req.params.job_schedule_id];
+  db.connectAndQuery({sql, values}, (error, results) => {
+    if(error) {
+      console.error("delete_job_sched: sql err:", error);
+      res.sendStatus(500);
+    } else {
+      res.sendStatus(200);
+    }
   });
 }

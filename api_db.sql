@@ -70,7 +70,7 @@ CREATE TABLE company (
   property_bag blob,
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
   created_by INT DEFAULT NULL,
-  modified_at DATETIME,
+  modified_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   modified_by INT,
   is_deleted boolean,
   deleted_at DATETIME,
@@ -100,7 +100,7 @@ CREATE TABLE job (
   takedown_at DATETIME,
   created_at DATETIME,
   created_by INT,
-  modified_at DATETIME,
+  modified_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   modified_by INT,
   is_deleted boolean,
   deleted_at DATETIME,
@@ -219,7 +219,7 @@ CREATE TABLE employee_job (
   job_id int,
   status ENUM('saved', 'submitted', 'reviewed', 'interview', 'offer', 'pass'),
   interview_date DATETIME,
-  modified_at DATETIME,
+  modified_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (employee_job_id),
   UNIQUE KEY employee_and_job (employee_id, job_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
