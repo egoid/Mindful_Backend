@@ -26,10 +26,11 @@
     * type => user_role_descr
 * delete - '/1/user_role/:user_role_id'
 
-# Login Endpoint #
+# Login/Logout Endpoint #
 * post - '/1/user/login'
     * email
     * password
+* get - '/1/user/logout'
 
 # Company Endpoints #
 * post - '/1/company'

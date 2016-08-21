@@ -17,6 +17,7 @@ const USER_TYPES = ['employee', 'employer free', 'employer_paid_1', 'employer_pa
 
 router.get('/1/user/current',   get_current);
 router.post('/1/user/login',    login);
+router.get('/1/user/logout',    login);
 router.post('/1/user/register', register);
 
 router.post('/1/user_role', create_user_role);
@@ -216,6 +217,19 @@ function register(req, res) {
       res.status(201).send(session_key);
     }
   })
+}
+function logout(req, res) {
+  const session_key = req.get('X-Yobs-User-Session-Key') || req.cookies.user_session_key;
+  const sql = "DELETE FROM user_session WHERE user_session_key = ?";
+  const values = [session_key];
+  db.connectAndQuery({sql, values}, (error, results) => {
+    if(error) {
+      console.error("login error", error);
+      res.sendStatus(500);
+    } else {
+      res.sendStatus(200);
+    }
+  });
 }
 
 function create_user_role(req, res) {
