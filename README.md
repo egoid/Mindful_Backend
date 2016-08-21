@@ -4,23 +4,42 @@
 * Put is "UPDATE" and can return 200, 400, 404, or 500
 * Delete is "DELETE" and can return 200, 4004, or 500
 * Single "GET" endpoints should return objects not a list with only one item
+* For POST and PUT, all variables are listed and should be sent as either FormData or JSON
+* For GET endpoints, the data is returned identically as it is represented in the database
 
 # User Endpoints #
 * post - '/1/user/register'
+    * email
+    * password
     * user_type is one of ['employee','employer free','employer_paid_1','employer_paid_2']
+        * defaults to "employee"
+    * user_role_id
 * get - '/1/user/current'
 
 # User Role Endpoints #
 * post - '/1/user_role'
+    * name => user_role_name
+    * type => user_role_descr
 * get - '/1/user_role/:user_role_id'
 * put - '/1/user_role/:user_role_id'
+    * name => user_role_name
+    * type => user_role_descr
 * delete - '/1/user_role/:user_role_id'
 
 # Login Endpoint #
 * post - '/1/user/login'
+    * email
+    * password
 
 # Company Endpoints #
 * post - '/1/company'
+    * name
+    * industry
+        * id (optional)
+        * name => industry_name
+        * type => industry_type
+    * email_domain
+    * property_bag (JSON)
 * get - '/1/company/:company_id', get_company);
 
 # Single Job Endpoints #
