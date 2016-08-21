@@ -72,7 +72,6 @@ function login(req, res) {
         if(error) {
           console.error("login error: ", error);
         } else if(!res) {
-          console.error("login error: compare failed");
           error = "Bad password";
         }
         done(error);
@@ -116,8 +115,9 @@ function login(req, res) {
       res.status(400).send(error);
     } else if(error) {
       res.sendStatus(500);
+    } else {
+      res.status(200).send(session_key);
     }
-    res.status(200).send(session_key);
   });
 }
 function register(req, res) {
@@ -135,12 +135,23 @@ function register(req, res) {
   let session_key;
   let pw_hash;
   let user_id;
+  let connection;
 
   async.series([
     (done) => {
+      const sql = "START TRANSACTION";
+      db.queryAndGetConnection({ sql }, (error, results, c) => {
+        if(error) {
+          console.error("register: sql err:", error);
+        }
+        connection = c;
+        done(error);
+      });
+    },
+    (done) => {
       const sql = "SELECT user_id FROM user WHERE email = ?";
       const values = [email];
-      db.connectAndQuery({sql, values}, (error, results) => {
+      db.queryWithConnection(connection, sql, values, (error, results) => {
         if(error) {
           console.error('register error', error);
         } else if(results[0] && results[0].user_id) {
@@ -157,11 +168,11 @@ function register(req, res) {
       });
     },
     (done) => {
-      const sql = "INSERT INTO user (email, password, user_type, user_role_id) VALUES (?)";
+      const sql = "INSERT INTO user (email, password, user_type, user_role_id) VALUES (?, ?, ?, ?)";
       const values = [email, pw_hash, user_type, user_role_id];
-      db.connectAndQuery({sql, values}, (error, results) => {
+      db.queryWithConnection(connection, sql, values, (error, results) => {
         if(error) {
-          console.error("register error", error);
+          console.error("register: sql err:", error);
         } else {
           user_id = results.insertId;
         }
@@ -181,21 +192,29 @@ function register(req, res) {
     (done) => {
       const sql = "INSERT INTO user_session (user_session_key, user_id) VALUES (?, ?)";
       const values = [session_key, user_id];
-      db.connectAndQuery({sql, values}, (error, results) => {
+      db.queryWithConnection(connection, sql, values, (error, results) => {
         if(error) {
           console.error("register error", error);
         }
         done(error);
       });
+    },
+    (done) => {
+      db.commit(connection, done);
     }
   ],
   (error) => {
+    if(error) {
+      db.rollback(connection);
+    }
+
     if(error == 'User already exists') {
       res.status(400).send(error);
     } else if(error || !session_key) {
       res.sendStatus(500);
+    } else {
+      res.status(201).send(session_key);
     }
-    res.status(201).send(session_key);
   })
 }
 

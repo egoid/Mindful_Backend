@@ -297,3 +297,10 @@ CREATE TABLE job_schedule (
   PRIMARY KEY(job_schedule_id),
   CONSTRAINT job FOREIGN KEY (job_id) REFERENCES job (job_id) ON UPDATE CASCADE ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+CREATE TABLE user_session_key (
+  user_session_key varchar(32),
+  user_id int,
+  PRIMARY KEY(user_session_key),
+  CONSTRAINT user FOREIGN KEY (user_id) REFERENCES user (user_id) ON UPDATE CASCADE ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
