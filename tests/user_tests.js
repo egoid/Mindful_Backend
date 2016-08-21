@@ -2,7 +2,8 @@
 var json_data = JSON.stringify({
   email: "saronoff@gmail",
   password: "foobar",
-  user_type: "employee"
+  user_type: "employee",
+  user_role_id: 1
 });
 
 var xhr = new XMLHttpRequest();

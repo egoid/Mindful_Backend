@@ -1,5 +1,4 @@
 {
-  "environment": "dev",
   "mysql_db_raw": {
     "host": "",
     "user": "root",

@@ -15,6 +15,7 @@ const DEFAULT_DB_CONF = {
 
 if(process.env.environment == 'prod') {
   config.mysql_db_prod.host = process.env.RDS_hostname;
+  config.mysql_db_prod.user = process.env.RDS_username;
   config.mysql_db_prod.password = process.env.RDS_password;
   config.mysql_db_prod.port = process.env.RDS_port;
 }
