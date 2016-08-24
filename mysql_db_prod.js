@@ -73,6 +73,10 @@ function queryAndGetConnection(opts, callback) {
   });
 }
 function rollback(connection, done) {
+  if(!done) {
+    done = function() {};
+  }
+
   queryWithConnection(connection, "ROLLBACK", [], (error) => {
     try {
       connection.release();

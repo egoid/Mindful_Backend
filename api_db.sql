@@ -174,7 +174,7 @@ CREATE TABLE user (
   deleted_by int,
   created_at DATETIME,
   PRIMARY KEY (user_id),
-  CONSTRAINT user_role FOREIGN KEY (user_role_id) REFERENCES user_role (user_role_id) ON UPDATE CASCADE ON DELETE CASCADE,
+  CONSTRAINT user_role FOREIGN KEY (user_role_id) REFERENCES user_role (user_role_id) ON UPDATE CASCADE ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 CREATE TABLE employer (
@@ -298,7 +298,7 @@ CREATE TABLE job_schedule (
   CONSTRAINT job FOREIGN KEY (job_id) REFERENCES job (job_id) ON UPDATE CASCADE ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
-CREATE TABLE user_session_key (
+CREATE TABLE user_session (
   user_session_key varchar(32),
   user_id int,
   PRIMARY KEY(user_session_key),
