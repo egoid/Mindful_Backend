@@ -55,7 +55,7 @@ function create_shift_type(req, res) {
     if(error) {
       res.sendStatus(500);
     } else {
-      res.status(201).send(shift_type_id);
+      res.status(200).send(shift_type_id);
     }
   });
 }
@@ -72,11 +72,8 @@ function get_shift_type(req, res) {
   });
 }
 function update_shift_type(req, res) {
-  const name = req.body.name;
-  const type = req.body.type;
-
   const sql = "UPDATE shift_type SET shift_type_name=?, shift_type_descr=? WHERE shift_type_id=?";
-  const values = [name, type, req.params.shift_type_id];
+  const values = [req.body.name, req.body.type, req.params.shift_type_id];
   db.connectAndQuery({sql, values}, (error, results) => {
     if(error) {
       console.error("update_shift_type: sql err:", error);

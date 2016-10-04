@@ -55,7 +55,7 @@ function create_skill_type(req, res) {
     if(error) {
       res.sendStatus(500);
     } else {
-      res.status(201).send(skill_type_id);
+      res.status(200).send(skill_type_id);
     }
   });
 }

@@ -100,6 +100,7 @@ function create_employer(req, res) {
   }
 }
 function update_employer(req, res) {
+  const employer_id = req.params.employer_id;
   const location_name = req.body.location_name || null;
   let search_formatted;
   let search_lat;
@@ -123,16 +124,13 @@ function update_employer(req, res) {
     },
     (done) => {
       if(search_formatted) {
-        let sql = "UPDATE employee SET ";
-        const columns = [];
-        const values = [];
+        let sql = "UPDATE employer SET ? WHERE employer_id = ?";
+        const values = [{
+          location_name: search_formatted,
+          location_latitude: search_lat,
+          location_longitude: search_long,
+        }, employer_id];
 
-        if(search_formatted) {
-          columns.push('location_name=?', 'location_latitude=?', 'location_longitude=?');
-          values.push(search_formatted, search_lat, search_long);
-        }
-
-        sql = sql + columns.join(",");
         db.connectAndQuery({sql, values}, (error, results) => {
           if(error) {
             console.error("update_employer: sql err:", error);

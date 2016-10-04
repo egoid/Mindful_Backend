@@ -8,6 +8,7 @@ const NodeGeocoder = require('node-geocoder');
 const db = require('../../mysql_db_prod.js');
 const session = require('../../session.js');
 const util = require('../../util.js');
+const company_util = require('../company.js');
 
 const router = new express.Router();
 exports.router = router;
@@ -24,15 +25,18 @@ router.get('/1/jobs', search_job);
 router.post('/1/jobs', search_job);
 
 router.post('/1/job', create_job);
-router.put('/1/job/:job_id', update_job);
+router.post('/1/job/:job_id', update_job);
 router.delete('/1/job/:job_id', delete_job);
 router.get('/1/job/:job_id', get_job);
+
+router.post('/1/job_role', create_job_role);
+router.post('/1/job_type', create_job_type);
 
 router.post('/1/job/:job_id/schedule', create_job_sched);
 router.post('/1/job/:job_id/skill', create_job_skill);
 
 router.get('/1/job_schedule/:job_sched_id', get_job_sched);
-router.put('/1/job_schedule/:job_sched_id', update_job_sched);
+router.post('/1/job_schedule/:job_sched_id', update_job_sched);
 router.delete('/1/job_schedule/:job_sched_id', delete_job_sched);
 
 router.get('/1/job_skill/:job_skill_id', get_job_skill)
@@ -102,58 +106,6 @@ const LABEL_TO_RADIUS = {
 };
 const SCHEDULE_VALUES = ['all','none','morning','afternoon','evening','night'];
 
-function _create_company(company_def, conn, all_done) {
-  let industry_id;
-  let company_id;
-
-  if(company_def.id) {
-    all_done(null, company_def.id);
-  } else {
-    async.series([
-      (done) => {
-        _create_industry(company_def.industry, conn, (error, result) => {
-          if(error) {
-            console.error("_create_company: sql err:", error);
-          } else {
-            industry_id = result;
-          }
-          done(error);
-        });
-      },
-      (done) => {
-        const sql = "SELECT company_id FROM company WHERE name = ?";
-        const values = [company_def.name];
-        db.queryWithConnection(conn, sql , values, (error, results) => {
-          if(error) {
-            console.error("_create_company: sql err:", error);
-          } else if(results.length > 0) {
-            company_id = results[0].company_id;
-          }
-          done(error);
-        });
-      },
-      (done) => {
-        if(!company_id) {
-          const sql = "INSERT INTO company (name, industry_id, email_domain, property_bag) VALUES (?,?,?,?)";
-          const values = [company_def.name, industry_id, company_def.email_domain, JSON.stringify(company_def.property_bag)];
-          db.queryWithConnection(conn, sql , values, (error, results) => {
-            if(error) {
-              console.error("_create_company: sql err:", error);
-            } else {
-              company_id = results.insertId;
-            }
-            done(error);
-          });
-        } else {
-          done();
-        }
-      }
-    ],
-    (error) => {
-      all_done(error, company_id);
-    });
-  }
-}
 function _create_job_role(role_def, conn, all_done) {
   if(role_def.id) {
     all_done(null, role_def.id);
@@ -234,46 +186,6 @@ function _create_job_type(type_def, conn, all_done) {
     });
   }
 }
-function _create_industry(industry_def, conn, all_done) {
-  if(industry_def.id) {
-    all_done(null, industry_def.id);
-  } else {
-    let industry_id;
-    async.series([
-      (done) => {
-        const sql = "SELECT industry_id FROM industry WHERE industry_type = ?";
-        const values = [industry_def.type];
-        db.queryWithConnection(conn, sql , values, (error, results) => {
-          if(error) {
-            console.error("_create_industry: sql err:", error);
-          } else if(results[0] && results[0].industry_id) {
-            industry_id = results[0].industry_id;
-          }
-          done(error);
-        });
-      },
-      (done) => {
-        if(!industry_id) {
-          const sql = "INSERT IGNORE INTO industry (industry_name, industry_type) VALUES (?, ?)";
-          const values = [industry_def.name, industry_def.type];
-          db.queryWithConnection(conn, sql, values, (error, results) => {
-            if(error) {
-              console.error("_create_industry: sql err:", error);
-            } else {
-              industry_id = results.insertId;
-            }
-            done(error);
-          });
-        } else {
-          done();
-        }
-      },
-    ],
-    (error) => {
-      all_done(error, industry_id);
-    });
-  }
-}
 function _extract_job_def(req) {
   return {
     title: req.body.title,
@@ -328,6 +240,84 @@ function _to_radians(degrees) {
   return degrees * Math.PI / 180;
 }
 
+function create_job_role(req, res) {
+  let connection;
+  let job_role_id;
+
+  const job_role_def = req.body;
+
+  async.series([
+    (done) => {
+      db.getConnection((error, conn) => {
+        if(error) {
+          console.error("create_job_role: sql err:", error);
+        }
+        connection = conn;
+        done(error);
+      });
+    },
+    (done) => {
+      _create_job_role(job_role_def, connection, (error, id) => {
+        if(error) {
+          console.error("create_job_role: sql err:", error);
+        }
+
+        job_role_id = id;
+        done(error);
+      });
+    },
+    (done) => {
+      db.commit(connection, done);
+    },
+  ],
+  (error) => {
+    if(error) {
+      db.rollback();
+      res.sendStatus(500);
+    } else {
+      res.status(200).send({id: job_role_id});
+    }
+  });
+}
+function create_job_type(req, res) {
+  let connection;
+  let job_type_id;
+
+  const job_type_def = req.body;
+
+  async.series([
+    (done) => {
+      db.getConnection((error, conn) => {
+        if(error) {
+          console.error("create_job_type: sql err:", error);
+        }
+        connection = conn;
+        done(error);
+      });
+    },
+    (done) => {
+      _create_job_type(job_type_def, connection, (error, id) => {
+        if(error) {
+          console.error("create_job_type: sql err:", error);
+        }
+
+        job_type_id = id;
+        done(error);
+      });
+    },
+    (done) => {
+      db.commit(connection, done);
+    },
+  ],
+  (error) => {
+    if(error) {
+      db.rollback();
+      res.sendStatus(500);
+    } else {
+      res.status(200).send({id: job_type_id});
+    }
+  });
+}
 function create_job(req, res) {
   const company_def = req.body.company;
   const job_role = req.body.job_role;
@@ -361,9 +351,9 @@ function create_job(req, res) {
       });
     },
     (done) => {
-      _create_company(company_def, connection, (error, result) => {
+      company_util.create_company(company_def, connection, (error, result) => {
         if(error) {
-          console.error("create_job: _create_company err:", error);
+          console.error("create_job: create_company err:", error);
         } else {
           company_id = result;
         }
@@ -457,7 +447,7 @@ function create_job(req, res) {
       console.error("create_job: sql err:", error);
       res.sendStatus(500);
     } else {
-      res.status(201).send(result);
+      res.status(200).send(result);
     }
   });
 }
@@ -488,24 +478,22 @@ function update_job(req, res) {
   const job_role = req.body.job_role;
   const job_type = req.body.job_type;
   const job_values = _extract_job_def(req);
+  const job_id = req.params.job_id;
 
   if(!company_def.id || !job_role.id || !job_type.id) {
     res.status(400).send("When updating a job, company, job roles, and job types cannot be created.");
   } else {
-    const args = [];
-    const values = [];
-    _.each(Object.keys(job_values), (column) => {
-      args.push(column + "=?");
-      values.push(job_values[column]);
-    });
-
-    const sql = "UPDATE job SET " + args.join(",");
-    db.connectAndQuery({sql, values}, (error, results) => {
+    const sql = "UPDATE job SET ? WHERE job_id = ?";
+    db.connectAndQuery({sql, values: [job_values, job_id]}, (error, results) => {
       if(error) {
         console.error("update_job: sql err:", error);
         res.sendStatus(500);
       } else {
-        res.sendStatus(200);
+        if(results.affectedRows < 1) {
+          res.sendStatus(404);
+        } else {
+          res.status(200).send({ id: job_id });
+        }
       }
     });
   }
@@ -536,7 +524,7 @@ function search_job(req, res) {
   let search_long;
   let search_formatted;
 
-  if(LABEL_TO_RADIUS.indexOf(search_radius_label) < 0) {
+  if(Object.keys(LABEL_TO_RADIUS).indexOf(search_radius_label) < 0) {
     search_radius_label = 'bike';
   }
 
@@ -638,7 +626,7 @@ function create_job_sched(req, res) {
         consle.error(error);
         res.sendStatus(500);
       } else {
-        res.status(201).send(results.insertId);
+        res.status(200).send(results.insertId);
       }
     });
   }
@@ -702,7 +690,7 @@ function create_job_skill(req, res) {
       console.error("create_job_skill: sql err:", error);
       res.sendStatus(500);
     } else {
-      res.status(201).send(results.insertId);
+      res.status(200).send(results.insertId);
     }
   });
 }

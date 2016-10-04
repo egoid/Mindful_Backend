@@ -7,6 +7,7 @@ const express = require('express');
 const db = require('../../mysql_db_prod.js');
 const session = require('../../session.js');
 const util = require('../../util.js');
+const industry_util = require('../industry.js');
 
 const router = new express.Router();
 exports.router = router;
@@ -19,17 +20,38 @@ router.delete('/1/industry/:industry_id', delete_industry);
 router.get('/1/industry', get_all_industry);
 
 function create_industry(req, res) {
-  const name = req.body.name;
-  const type = req.body.type;
+  let industry_id;
+  let connection;
 
-  const sql = "INSERT INTO industry (industry_name, industry_type) VALUES (?,?)";
-  const values = [name, type];
-  db.connectAndQuery({sql, values}, (error, results) => {
+  async.series([
+    (done) => {
+      db.getConnection((error, conn) => {
+        if(error) {
+          console.error(error);
+        }
+        connection = conn;
+        done(error);
+      });
+    },
+    (done) => {
+      industry_util.create_industry(req.body, connection, (error, id) => {
+        if(error) {
+          console.error(error);
+        }
+        industry_id = id;
+        done(error);
+      });
+    },
+    (done) => {
+      db.commit(connection, done);
+    }
+  ],
+  (error) => {
     if(error) {
-      console.error("create_industry: sql err:", error);
-      res.sendStatus(500);
+      db.rollback(connection);
+      res.status(500).send({ error });
     } else {
-      res.status(201).send(results.insertId);
+      res.status(200).send({ id: industry_id });
     }
   });
 }

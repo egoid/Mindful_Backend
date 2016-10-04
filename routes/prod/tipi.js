@@ -38,7 +38,7 @@ function create_tipi(req, res) {
         console.error("create_tipi: sql err:", error);
         res.sendStatus(500);
       } else {
-        res.status(201).send(results.insertId);
+        res.status(200).send(results.insertId);
       }
     });
   }
@@ -67,7 +67,7 @@ function update_tipi(req, res) {
 
   const sql = "UPDATE tipi_score " +
   "extraversion=?, agreeableness=?, conscientiousness=?, " +
-  " emotional_stability=?, openness_to_experiences =? WHERE tipi_score_id=?";
+  " emotional_stability=?, openness_to_experiences=? WHERE tipi_score_id=?";
   const values = [extraversion, agreeableness, conscientiousness,
                   emotional_stability, openness_to_experiences,
                   req.params.tipi_score_id];

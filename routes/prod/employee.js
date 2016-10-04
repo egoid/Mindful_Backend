@@ -142,6 +142,7 @@ function create_employee(req, res) {
   }
 }
 function update_employee(req, res) {
+  const employee_id = req.params.employee_id;
   const location_name = req.body.location_name || null;
   const UPDATABLE_COLS = [
     'school_id', 'transportation', 'tipi_score_id', 'headline', 'school_level',
@@ -169,23 +170,19 @@ function update_employee(req, res) {
       }
     },
     (done) => {
-      let sql = "UPDATE employee SET ";
-      const columns = [];
-      const values = [];
-
-      if(search_formatted) {
-        columns.push('location_name=?', 'location_latitude=?', 'location_longitude=?');
-        values.push(search_formatted, search_lat, search_long);
-      }
+      let sql = "UPDATE employee SET ? WHERE employee_id = ?";
+      const values = [{
+        location_name: search_formatted,
+        location_latitude: search_lat,
+        location_longitude: search_long,
+      }, employee_id];
 
       _.each(UPDATABLE_COLS, (col) => {
         if(req.body[col]) {
-          columns.push(col + "=?");
-          values.push(req.body[col]);
+          values[0][col] = req.body[col];
         }
       });
 
-      sql = sql + columns.join(",");
       db.connectAndQuery({sql, values}, (error, results) => {
         if(error) {
           console.error("update_employee: sql err:", error);
@@ -204,11 +201,9 @@ function update_employee(req, res) {
 }
 
 function get_employee_jobs_by_employee(req, res) {
-  const sql = {
-    sql: "SELECT employee_job.*, job.* FROM employee_job JOIN job USING(job_id) WHERE employee_id = ?",
-    nestedTables: true
-  };
+  const sql = "SELECT employee_job.*, job.* FROM employee_job JOIN job USING(job_id) WHERE employee_id = ?";
   const values = [req.params.employee_id];
+  
   db.connectAndQuery({sql, values}, (error, results) => {
     if(error) {
       console.error("get_employee_jobs_by_employee: sql err:", error);
@@ -549,7 +544,7 @@ function create_employee_skill(req, res) {
   });
 }
 function delete_employee_skill(req, res) {
-  const sql = "DELETE FROM employee_skill WHERE employee_role_id = ?";
+  const sql = "DELETE FROM employee_skill WHERE employee_skill_id = ?";
   const values = [req.params.employee_skill_id];
   db.connectAndQuery({sql, values}, (error, results) => {
     if(error) {

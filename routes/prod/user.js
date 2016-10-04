@@ -59,7 +59,7 @@ function login(req, res) {
       db.connectAndQuery({sql, values}, (error, results) => {
         if(error) {
           console.error("login error", error);
-        } else if(results[0].user_id > 0) {
+        } else if(results[0] && results[0].user_id > 0) {
           db_pass = results[0].password;
           user_id = results[0].user_id;
         }  else {
@@ -214,7 +214,7 @@ function register(req, res) {
     } else if(error || !session_key) {
       res.sendStatus(500);
     } else {
-      res.status(201).send(session_key);
+      res.status(200).send(session_key);
     }
   })
 }
@@ -240,7 +240,7 @@ function create_user_role(req, res) {
       console.error("create_user_role: sql err:", error);
       res.sendStatus(500);
     } else {
-      res.status(201).send(results.insertId);
+      res.status(200).send(results.insertId);
     }
   });
 }
@@ -300,7 +300,7 @@ function create_user_type(req, res) {
       console.error("create_user_type: sql err:", error);
       res.sendStatus(500);
     } else {
-      res.status(201).send(results.insertId);
+      res.status(200).send(results.insertId);
     }
   });
 }
