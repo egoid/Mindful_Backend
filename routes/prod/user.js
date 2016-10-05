@@ -162,7 +162,7 @@ function register(req, res) {
     },
     (done) => {
       bcrypt.hash(password, 10, function(err, hash) {
-        if(error) {
+        if(err) {
           console.error("register: bcrypt.hash err:", error);
         }
 
