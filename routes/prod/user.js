@@ -83,7 +83,7 @@ function login(req, res) {
       const values = [user_id];
       db.connectAndQuery({sql, values}, (error, results) => {
         if(error) {
-          console.error("login error", error);
+          console.error("login: sql error:", error);
         }
         done(error);
       });
@@ -91,7 +91,7 @@ function login(req, res) {
     (done) => {
       crypto.randomBytes(24, (error, buffer) => {
         if(error) {
-          console.error("register: randomBytes err:", error);
+          console.error("login: randomBytes err:", error);
         } else {
           session_key = buffer.toString('base64');
         }
@@ -103,7 +103,7 @@ function login(req, res) {
       const values = [session_key, user_id];
       db.connectAndQuery({sql, values}, (error, results) => {
         if(error) {
-          console.error("register error", error);
+          console.error("login: sql error:", error);
         }
         done(error);
       });
@@ -124,13 +124,11 @@ function login(req, res) {
 function register(req, res) {
   const email = req.body.email;
   const password = req.body.password;
-  const user_type = req.body.user_type;
+  const user_type = req.body.user_type || 'employee';
   const user_role_id = req.body.user_role_id;
 
   if(user_type && USER_TYPES.indexOf(user_type) < 0) {
     res.status(400).send('Invalid user type');
-  } else if(!user_type) {
-    user_type = 'employee';
   }
 
   let session_key;
@@ -164,6 +162,10 @@ function register(req, res) {
     },
     (done) => {
       bcrypt.hash(password, 10, function(err, hash) {
+        if(error) {
+          console.error("register: bcrypt.hash err:", error);
+        }
+
         pw_hash = hash;
         done(err);
       });
@@ -195,7 +197,7 @@ function register(req, res) {
       const values = [session_key, user_id];
       db.queryWithConnection(connection, sql, values, (error, results) => {
         if(error) {
-          console.error("register error", error);
+          console.error("register: sql error:", error);
         }
         done(error);
       });
