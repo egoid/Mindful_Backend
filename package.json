@@ -26,8 +26,6 @@
     "mysql": "*",
     "node-config-sets": "*",
     "node-geocoder": "*",
-    "pg": "^6.0.3",
-    "sentiment": "1.0.6",
-    "server-control": "0.0.6"
+    "pg": "^6.0.3"
   }
 }

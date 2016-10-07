@@ -7,7 +7,6 @@ var morgan = require('morgan');
 var method_override = require('method-override');
 var body_parser = require('body-parser');
 var cookie_parser = require('cookie-parser');
-var server_control = require('server-control');
 var errorhandler = require('errorhandler');
 
 // Local Files
@@ -48,7 +47,7 @@ function allow_cross_domain(req,res,next) {
     }
     res.header("Access-Control-Allow-Methods","GET,PUT,POST,DELETE,OPTIONS");
     res.header("Access-Control-Allow-Headers",
-      "Content-Type,Accept,X-Requested-With,X-HTTP-Method-Override,X-MC-API-Key,X-MC-User-Session-Key,X-MC-Admin-Session-Key");
+      "Content-Type,Accept,X-Requested-With,X-HTTP-Method-Override,X-Yobs-API-Key,X-Yobs-User-Session-Key,X-Yobs-Admin-Session-Key");
     res.header("Access-Control-Max-Age","3600");
   }
 
