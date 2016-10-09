@@ -14,7 +14,44 @@ exports.router = router;
 
 router.get('/1/company', get_companies);
 router.get('/1/company/:company_id', get_company);
+router.post('/1/company', create_company);
 
+function create_company(req, res) {
+  let company_id;
+  let connection;
+
+  async.series([
+    (done) => {
+      db.getConnection((error, conn) => {
+        if(error) {
+          console.error(error);
+        }
+        connection = conn;
+        done(error);
+      });
+    },
+    (done) => {
+      company_util.create_company(req.body, connection, (error, id) => {
+        if(error) {
+          console.error(error);
+        }
+        company_id = id;
+        done(error);
+      });
+    },
+    (done) => {
+      db.commit(connection, done);
+    }
+  ],
+  (error) => {
+    if(error) {
+      db.rollback(connection);
+      res.status(500).send({ error });
+    } else {
+      res.status(200).send({ id: company_id });
+    }
+  });
+}
 function get_company(req, res) {
   const company_id = req.params.company_id;
   const sql = "SELECT * FROM company WHERE company_id = ?";

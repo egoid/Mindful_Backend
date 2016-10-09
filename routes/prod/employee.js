@@ -22,7 +22,6 @@ const SCHEDULE_VALUES = ['all','none','morning','afternoon','evening','night'];
 const EMPLOYEE_JOB_STATUS = ['saved','submitted','reviewed','interview','offer','pass'];
 
 router.post('/1/employee', create_employee);
-
 router.get('/1/employee/:employee_id', get_employee);
 router.put('/1/employee/:employee_id', update_employee);
 
@@ -34,10 +33,11 @@ router.get('/1/employee/:employee_id/schedule', get_employee_sched_by_employee);
 router.get('/1/employee/:employee_id/skill', get_employee_skill_by_employee);
 router.get('/1/employee/:employee_id/tipi', get_employee_tipi_by_employee);
 
-router.post('/1/employee/:employee_id/job', create_employee_job);
-router.post('/1/employee/:employee_id/skill', create_employee_skill);
-router.post('/1/employee/:employee_id/schedule', create_employee_sched);
-router.post('/1/employee/:employee_id/experience', create_employee_experience);
+router.post('/1/employee/job', create_employee_job);
+router.post('/1/employee/skill', create_employee_skill);
+
+router.post('/1/employee/schedule', create_employee_sched);
+router.post('/1/employee/experience', create_employee_experience);
 
 router.get('/1/experience/:experience_id', get_employee_experience)
 router.delete('/1/experience/:experience_id', delete_employee_experience);
@@ -58,8 +58,8 @@ function get_employee(req, res) {
   const sql = "SELECT employee.*, user.alias AS employee_name " +
               "FROM employee " +
               "JOIN user USING(user_id) " +
-              "WHERE employee_id = ?";
-  const values = [req.params.employee_id];
+              "WHERE employee_id=?";
+  const values = [req.user.employee_id];
 
   db.connectAndQuery({sql, values}, (error, results) => {
     if(error) {
@@ -73,7 +73,7 @@ function get_employee(req, res) {
   });
 }
 function create_employee(req, res) {
-  const user_id = req.body.user_id;
+  const user_id = req.user.user_id;
   if(!user_id) {
     res.status(400).send('User ID required');
   } else {
@@ -142,7 +142,13 @@ function create_employee(req, res) {
   }
 }
 function update_employee(req, res) {
-  const employee_id = req.params.employee_id;
+  const req_employee_id = req.params.employee_id;
+  const employee_id = req.user.employee_id;
+
+  if(req_employee_id != employee_id) {
+    res.sendStatus(403);
+  }
+
   const location_name = req.body.location_name || null;
   const UPDATABLE_COLS = [
     'school_id', 'transportation', 'tipi_score_id', 'headline', 'school_level',
@@ -202,8 +208,8 @@ function update_employee(req, res) {
 
 function get_employee_jobs_by_employee(req, res) {
   const sql = "SELECT employee_job.*, job.* FROM employee_job JOIN job USING(job_id) WHERE employee_id = ?";
-  const values = [req.params.employee_id];
-  
+  const values = [req.user.employee_id];
+
   db.connectAndQuery({sql, values}, (error, results) => {
     if(error) {
       console.error("get_employee_jobs_by_employee: sql err:", error);
@@ -217,7 +223,7 @@ function get_employee_jobs_by_employee(req, res) {
 }
 function get_employee_skill_by_employee(req, res) {
   const sql = "SELECT * FROM employee_skill WHERE employee_id = ?";
-  const values = [req.params.employee_id];
+  const values = [req.user.employee_id];
   db.connectAndQuery({sql, values}, (error, results) => {
     if(error) {
       console.error("get_employee_skill_by_employee: sql err:", error);
@@ -231,7 +237,7 @@ function get_employee_skill_by_employee(req, res) {
 }
 function get_employee_sched_by_employee(req, res) {
   const sql = "SELECT * FROM employee_schedule WHERE employee_id = ?";
-  const values = [req.params.employee_id];
+  const values = [req.user.employee_id];
   db.connectAndQuery({sql, values}, (error, results) => {
     if(error) {
       console.error("get_employee_sched_by_employee: sql err:", error);
@@ -245,7 +251,7 @@ function get_employee_sched_by_employee(req, res) {
 }
 function get_employee_experience_by_employee(req, res) {
   const sql = "SELECT * FROM employee_experience WHERE employee_id = ?";
-  const values = [req.params.employee_id];
+  const values = [req.user.employee_id];
   db.connectAndQuery({sql, values}, (error, results) => {
     if(error) {
       console.error("get_employee_experience_by_employee: sql err:", error);
@@ -259,7 +265,7 @@ function get_employee_experience_by_employee(req, res) {
 }
 function get_employee_tipi_by_employee(req, res) {
   const sql = "SELECT * FROM tipi_score WHERE employee_id = ?";
-  const values = [req.params.employee_id];
+  const values = [req.user.employee_id];
   db.connectAndQuery({sql, values}, (error, results) => {
     if(error) {
       console.error("get_employee_tipi_by_employee: sql err:", error);
@@ -275,7 +281,7 @@ function get_employee_industry_by_employee(req, res) {
   const sql = "SELECT industry.*, employee_interested_industry.* " +
               "FROM employee_interested_industry " +
               "WHERE employee_id = ?";
-  const values = [req.params.employee_id];
+  const values = [req.user.employee_id];
 
   db.connectAndQuery({sql, values}, (error, results) => {
     if(error) {
@@ -291,8 +297,8 @@ function get_employee_industry_by_employee(req, res) {
 
 /**** EMPLOYEE SCHEDULE ENDPOINTS ****/
 function get_employee_sched(req, res) {
-  const sql = "SELECT * FROM employee_schedule WHERE employee_schedule_id = ?";
-  const values = [req.params.employee_schedule_id];
+  const sql = "SELECT * FROM employee_schedule WHERE employee_schedule_id = ? AND employee_id = ?";
+  const values = [req.params.employee_schedule_id, req.user.employee_id];
   db.connectAndQuery({sql, values}, (error, results) => {
     if(error) {
       console.error("get_employee_sched: sql err:", error);
@@ -305,7 +311,7 @@ function get_employee_sched(req, res) {
   });
 }
 function create_employee_sched(req, res) {
-  const employee_id = req.params.employee_id;
+  const employee_id = req.user.employee_id;
   if(!req.body.schedule || req.body.schedule.length < 7) {
     res.status(400).send('Seven day schedule required.');
   } else {
@@ -353,8 +359,8 @@ function update_employee_sched(req, res) {
       }
     });
 
-    const sql = "UPDATE employee_schedule SET ? WHERE employee_schedule_id = ?";
-    const values = [arg_map, employee_schedule_id];
+    const sql = "UPDATE employee_schedule SET ? WHERE employee_schedule_id = ? AND employee_id = ?";
+    const values = [arg_map, employee_schedule_id, req.user.employee_id];
     db.connectAndQuery({sql, values}, (error, results) => {
       if(error) {
         console.error("update_employee_sched: sql err:", error);
@@ -368,8 +374,8 @@ function update_employee_sched(req, res) {
   }
 }
 function delete_employee_sched(req, res) {
-  const sql = "DELETE FROM employee_schedule WHERE employee_schedule_id = ?";
-  const values = [req.params.employee_schedule_id];
+  const sql = "DELETE FROM employee_schedule WHERE employee_schedule_id = ? AND employee_id = ?";
+  const values = [req.params.employee_schedule_id, req.user.employee_id];
   db.connectAndQuery({sql, values}, (error, results) => {
     if(error) {
       console.error("delete_employee_sched: sql err:", error);
@@ -384,8 +390,8 @@ function delete_employee_sched(req, res) {
 
 /**** EMPLOYEE EXPERIENCE ENDPOINTS ****/
 function get_employee_experience(req, res) {
-  const sql = "SELECT * FROM employee_experience WHERE employee_experience_id = ?";
-  const values = [req.params.experience_id];
+  const sql = "SELECT * FROM employee_experience WHERE employee_experience_id = ? AND employee_id = ?";
+  const values = [req.params.experience_id, req.user.employee_id];
   db.connectAndQuery({sql, values}, (error, results) => {
     if(error) {
       console.error("get_employee_experience: sql err:", error);
@@ -398,7 +404,7 @@ function get_employee_experience(req, res) {
   });
 }
 function create_employee_experience(req, res) {
-  const employee_id = req.params.employee_id;
+  const employee_id = req.user.employee_id;
 
   if(!req.body.company || !req.body.job_role_id || !req.body.start_date) {
     res.status(400).send('Company, job role ID, and start date are required.');
@@ -423,8 +429,8 @@ function create_employee_experience(req, res) {
   }
 }
 function delete_employee_experience(req, res) {
-  const sql = "DELETE FROM employee_experience WHERE employee_experience_id = ?";
-  const values = [req.params.experience_id];
+  const sql = "DELETE FROM employee_experience WHERE employee_experience_id = ? AND employee_id = ?";
+  const values = [req.params.experience_id, req.user.employee_id];
   db.connectAndQuery({sql, values}, (error, results) => {
     if(error) {
       console.error("delete_employee_experience: sql err:", error);
@@ -439,8 +445,8 @@ function delete_employee_experience(req, res) {
 
 /**** EMPLOYEE JOB ENDPOINTS ****/
 function get_employee_job(req, res) {
-  const sql = "SELECT * FROM employee_job WHERE employee_job_id = ?";
-  const values = [req.params.employee_job_id];
+  const sql = "SELECT * FROM employee_job WHERE employee_job_id = ? AND employee_id = ?";
+  const values = [req.params.employee_job_id, req.user.employee_id];
   db.connectAndQuery({sql, values}, (error, results) => {
     if(error) {
       console.error("get_employee_job: sql err:", error);
@@ -453,7 +459,7 @@ function get_employee_job(req, res) {
   });
 }
 function create_employee_job(req, res) {
-  const employee_id = req.params.employee_id;
+  const employee_id = req.user.employee_id;
   const job_id = req.body.job_id;
   const interview_date = req.body.interview_date;
   let job_status = req.body.status;
@@ -484,8 +490,8 @@ function update_employee_job(req, res) {
     job_status = NULL;
   }
 
-  const sql = "UPDATE employee_job SET status = ?, interview_date = ? WHERE employee_job_id = ?";
-  const values = [job_status, interview_date, employee_job_id];
+  const sql = "UPDATE employee_job SET status = ?, interview_date = ? WHERE employee_job_id = ? AND employee_id = ?";
+  const values = [job_status, interview_date, employee_job_id, req.user.employee_id];
   db.connectAndQuery({sql, values}, (error, results) => {
     if(error) {
       console.error("update_employee_job: sql err:", error);
@@ -498,8 +504,8 @@ function update_employee_job(req, res) {
   });
 }
 function delete_employee_job(req, res) {
-  const sql = "DELETE FROM employee_job WHERE employee_job_id = ?";
-  const values = [req.params.employee_job_id];
+  const sql = "DELETE FROM employee_job WHERE employee_job_id = ? AND employee_id = ?";
+  const values = [req.params.employee_job_id, req.user.employee_id];
   db.connectAndQuery({sql, values}, (error, results) => {
     if(error) {
       console.error("delete_employee_job: sql err:", error);
@@ -514,8 +520,8 @@ function delete_employee_job(req, res) {
 
 /**** EMPLOYEE SKILL ENDPOINTS ****/
 function get_employee_skill(req, res) {
-  const sql = "SELECT * FROM employee_skill WHERE employee_skill_id = ?";
-  const values = [req.params.employee_skill_id];
+  const sql = "SELECT * FROM employee_skill WHERE employee_skill_id = ? AND employee_id = ?";
+  const values = [req.params.employee_skill_id, req.user.employee_id];
   db.connectAndQuery({sql, values}, (error, results) => {
     if(error) {
       console.error("get_employee_skill: sql err:", error);
@@ -528,7 +534,7 @@ function get_employee_skill(req, res) {
   });
 }
 function create_employee_skill(req, res) {
-  const employee_id = req.params.employee_id;
+  const employee_id = req.user.employee_id;
   const skill_type_id = req.body.skill_type_id;
 
   const sql = "INSERT INTO employee_skill (employee_id, skill_type_id) VALUES (?,?)";
@@ -544,8 +550,8 @@ function create_employee_skill(req, res) {
   });
 }
 function delete_employee_skill(req, res) {
-  const sql = "DELETE FROM employee_skill WHERE employee_skill_id = ?";
-  const values = [req.params.employee_skill_id];
+  const sql = "DELETE FROM employee_skill WHERE employee_skill_id = ? AND employee_id = ?";
+  const values = [req.params.employee_skill_id, req.user.employee_id];
   db.connectAndQuery({sql, values}, (error, results) => {
     if(error) {
       console.error("delete_employee_skill: sql err:", error);

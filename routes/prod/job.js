@@ -23,24 +23,9 @@ const geocoder = NodeGeocoder(GOOGLE_GEO_CONFIG);
 
 router.get('/1/jobs', search_job);
 router.post('/1/jobs', search_job);
-
-router.post('/1/job', create_job);
-router.post('/1/job/:job_id', update_job);
-router.delete('/1/job/:job_id', delete_job);
 router.get('/1/job/:job_id', get_job);
-
-router.post('/1/job_role', create_job_role);
-router.post('/1/job_type', create_job_type);
-
-router.post('/1/job/:job_id/schedule', create_job_sched);
-router.post('/1/job/:job_id/skill', create_job_skill);
-
 router.get('/1/job_schedule/:job_sched_id', get_job_sched);
-router.post('/1/job_schedule/:job_sched_id', update_job_sched);
-router.delete('/1/job_schedule/:job_sched_id', delete_job_sched);
-
 router.get('/1/job_skill/:job_skill_id', get_job_skill)
-router.delete('/1/job_skill/:job_skill_id', delete_job_skill);
 
 const JOB_KEYS = [
   'job_id',
@@ -240,217 +225,6 @@ function _to_radians(degrees) {
   return degrees * Math.PI / 180;
 }
 
-function create_job_role(req, res) {
-  let connection;
-  let job_role_id;
-
-  const job_role_def = req.body;
-
-  async.series([
-    (done) => {
-      db.getConnection((error, conn) => {
-        if(error) {
-          console.error("create_job_role: sql err:", error);
-        }
-        connection = conn;
-        done(error);
-      });
-    },
-    (done) => {
-      _create_job_role(job_role_def, connection, (error, id) => {
-        if(error) {
-          console.error("create_job_role: sql err:", error);
-        }
-
-        job_role_id = id;
-        done(error);
-      });
-    },
-    (done) => {
-      db.commit(connection, done);
-    },
-  ],
-  (error) => {
-    if(error) {
-      db.rollback();
-      res.sendStatus(500);
-    } else {
-      res.status(200).send({id: job_role_id});
-    }
-  });
-}
-function create_job_type(req, res) {
-  let connection;
-  let job_type_id;
-
-  const job_type_def = req.body;
-
-  async.series([
-    (done) => {
-      db.getConnection((error, conn) => {
-        if(error) {
-          console.error("create_job_type: sql err:", error);
-        }
-        connection = conn;
-        done(error);
-      });
-    },
-    (done) => {
-      _create_job_type(job_type_def, connection, (error, id) => {
-        if(error) {
-          console.error("create_job_type: sql err:", error);
-        }
-
-        job_type_id = id;
-        done(error);
-      });
-    },
-    (done) => {
-      db.commit(connection, done);
-    },
-  ],
-  (error) => {
-    if(error) {
-      db.rollback();
-      res.sendStatus(500);
-    } else {
-      res.status(200).send({id: job_type_id});
-    }
-  });
-}
-function create_job(req, res) {
-  const company_def = req.body.company;
-  const job_role = req.body.job_role;
-  const job_type = req.body.job_type;
-  const job_values = _extract_job_def(req);
-
-  let company_id;
-  let job_role_id;
-  let job_type_id;
-  let connection;
-  let latitude = null;
-  let longitude = null;
-  let radius_coordinates = {};
-
-  async.series([
-    (done) => {
-      db.getConnection((error, conn) => {
-        if(error) {
-          console.error("create_job: sql err:", error);
-        }
-        connection = conn;
-        done(error);
-      });
-    },
-    (done) => {
-      db.queryWithConnection(connection, "START TRANSACTION", [], (error) => {
-        if(error) {
-          console.error("create_job: sql err:", error);
-        }
-        done(error);
-      });
-    },
-    (done) => {
-      company_util.create_company(company_def, connection, (error, result) => {
-        if(error) {
-          console.error("create_job: create_company err:", error);
-        } else {
-          company_id = result;
-        }
-        done(error);
-      });
-    },
-    (done) => {
-      _create_job_role(job_role, connection, (error, result) => {
-        if(error) {
-          console.error("create_job: _create_job_role err:", error);
-        } else {
-          job_role_id = result;
-        }
-        done(error);
-      });
-    },
-    (done) => {
-      _create_job_type(job_type, connection, (error, result) => {
-        if(error) {
-          console.error("create_job: _create_job_type err:", error);
-        } else {
-          job_type_id = result;
-        }
-        done(error);
-      });
-    },
-    (done) => {
-      if(job_values.location) {
-        geocoder.geocode(job_values.location)
-          .then((res) => {
-            job_values.location = res[0].formattedAddress;
-            latitude = res[0].latitude;
-            longitude = res[0].longitude;
-            done();
-          })
-          .catch((err) => {
-            console.error("create_job: geocoding err:", err);
-            done(err);
-          });
-      } else {
-        done();
-      }
-    },
-    (done) => {
-      _.each(Object.keys(LABEL_TO_RADIUS), (label) => {
-        const radius = LABEL_TO_RADIUS[label];
-        radius_coordinates[label] = _radius_lat_long_calc(latitude, longitude, radius);
-      });
-      done();
-    },
-    (done) => {
-      const columns = [];
-      const values = [];
-
-      _.each(Object.keys(job_values), (column_name, count) => {
-        columns.push(column_name);
-        values.push(job_values[column_name]);
-      });
-
-      // Latitude is the Y axis, longitude is the X axis
-      _.each(Object.keys(radius_coordinates), (label) => {
-        columns.push('latitude_lower_' + label);
-        columns.push('longitude_lower_' + label);
-        columns.push('latitude_upper_' + label);
-        columns.push('longitude_upper_' + label);
-
-        values.push(radius_coordinates[label][3]);
-        values.push(radius_coordinates[label][2]);
-        values.push(radius_coordinates[label][1]);
-        values.push(radius_coordinates[label][0]);
-      });
-
-      columns.push('latitude, longitude, company_id', 'job_role_id', 'job_type_id');
-      values.push(latitude, longitude, company_id, job_role_id, job_type_id);
-
-      const sql = "INSERT INTO job (" + columns.join(',') + ")" + " VALUES (" + "?,".repeat(values.length).slice(0,-1) + ")";
-      db.queryWithConnection(connection, sql, values, (error, results) => {
-        if(error) {
-          console.error("create_job: sql err:", error);
-        }
-        done(error, results.insertId);
-      });
-    },
-    (done) => {
-      db.commit(connection, done);
-    },
-  ],
-  (error, result) => {
-    if(error) {
-      db.rollback(connection, () => {});
-      console.error("create_job: sql err:", error);
-      res.sendStatus(500);
-    } else {
-      res.status(200).send(result);
-    }
-  });
-}
 function get_job(req, res) {
   const sql = "SELECT job.*, company.* , industry.*, job_role.*, job_type.*, job_skill.*, skill_type.* " +
               "FROM job " +
@@ -473,46 +247,6 @@ function get_job(req, res) {
       }
     });
 }
-function update_job(req, res) {
-  const company_def = req.body.company;
-  const job_role = req.body.job_role;
-  const job_type = req.body.job_type;
-  const job_values = _extract_job_def(req);
-  const job_id = req.params.job_id;
-
-  if(!company_def.id || !job_role.id || !job_type.id) {
-    res.status(400).send("When updating a job, company, job roles, and job types cannot be created.");
-  } else {
-    const sql = "UPDATE job SET ? WHERE job_id = ?";
-    db.connectAndQuery({sql, values: [job_values, job_id]}, (error, results) => {
-      if(error) {
-        console.error("update_job: sql err:", error);
-        res.sendStatus(500);
-      } else {
-        if(results.affectedRows < 1) {
-          res.sendStatus(404);
-        } else {
-          res.status(200).send({ id: job_id });
-        }
-      }
-    });
-  }
-}
-function delete_job(req, res) {
-  const values = [req.params.job_id];
-  const sql = "DELETE FROM job WHERE job_id = ?";
-  db.connectAndQuery({sql, values}, (error, results) => {
-    if(error) {
-      console.error("delete_job: sql err:", error);
-      res.sendStatus(500);
-    } else if(results.affectedRows < 1) {
-      res.sendStatus(404);
-    } else {
-      res.sendStatus(200);
-    }
-  });
-}
-
 function search_job(req, res) {
   const search_location = req.body.location || req.query.location;
   const search_string = req.body.search || req.query.search;
@@ -586,7 +320,6 @@ function search_job(req, res) {
     }
   });
 }
-
 function get_job_sched(req, res) {
   const sql = "SELECT * FROM job_schedule WHERE job_schedule_id = ?";
   const values = [req.params.job_schedule_id];
@@ -601,99 +334,6 @@ function get_job_sched(req, res) {
     }
   });
 }
-function create_job_sched(req, res) {
-  const job_id = req.params.job_id;
-  if(!req.body.schedule || req.body.schedule.length < 7) {
-    res.status(400).send('Seven day schedule required.');
-  } else {
-    const values = [job_id];
-    const schedule = req.body.schedule;
-    _.each(schedule, (schedule_day) => {
-      if(SCHEDULE_VALUES.indexOf(schedule_day) < 0) {
-        values.push("none");
-      } else {
-        values.push(schedule_day);
-      }
-    });
-
-    const sql = "INSERT INTO job_schedule " +
-                "(job_id, sunday_schedule, monday_schedule, " +
-                " tuesday_schedule, wednesday_schedule, thursday_schedule, " +
-                " friday_schedule, saturday_schedule) VALUES "
-                "(?,?,?,?,?,?,?,?)";
-    db.connectAndQuery({sql, values}, (error, results) => {
-      if(error) {
-        consle.error(error);
-        res.sendStatus(500);
-      } else {
-        res.status(200).send(results.insertId);
-      }
-    });
-  }
-}
-function update_job_sched(req, res) {
-  const job_schedule_id = req.params.job_schedule_id;
-  if(!req.body.schedule || req.body.schedule.length < 7) {
-    res.status(400).send('Seven day schedule required.');
-  } else {
-    const arg_map = {};
-    const schedule = req.body.schedule;
-    const day_list = ['sunday_schedule', 'monday_schedule', 'tuesday_schedule',
-                      'wednesday_schedule', 'thursday_schedule', 'friday_schedule',
-                      'saturday_schedule'];
-    _.each(day_list, (day_column_name, i) => {
-      let schedule_day = schedule[i];
-      if(SCHEDULE_VALUES.indexOf(schedule_day) < 0) {
-        arg_map[day_column_name] = 'none';
-      } else {
-        arg_map[day_column_name] = schedule[i];
-      }
-    });
-
-    const sql = "UPDATE job_schedule SET ? WHERE job_schedule_id = ?";
-    const values = [arg_map, job_schedule_id];
-    db.connectAndQuery({sql, values}, (error, results) => {
-      if(error) {
-        console.error("update_job_sched: sql err:", error);
-        res.sendStatus(500);
-      } else if(results.affectedRows < 1) {
-        res.sendStatus(404);
-      } else {
-        res.sendStatus(200);
-      }
-    });
-  }
-}
-function delete_job_sched(req, res) {
-  const sql = "DELETE FROM job_schedule WHERE job_schedule_id = ?";
-  const values = [req.params.job_schedule_id];
-  db.connectAndQuery({sql, values}, (error, results) => {
-    if(error) {
-      console.error("delete_job_sched: sql err:", error);
-      res.sendStatus(500);
-    } else if(results.affectedRows < 1) {
-      res.sendStatus(404);
-    } else {
-      res.sendStatus(200);
-    }
-  });
-}
-
-function create_job_skill(req, res) {
-  const job_id = req.params.job_id;
-  const skill_type_id = req.body.skill_type_id;
-
-  const sql = "INSERT INTO job_skill (job_id, skill_type_id) VALUES (?,?)";
-  const values = [job_id, skill_type_id];
-  db.connectAndQuery({sql, values}, (error, results) => {
-    if(error) {
-      console.error("create_job_skill: sql err:", error);
-      res.sendStatus(500);
-    } else {
-      res.status(200).send(results.insertId);
-    }
-  });
-}
 function get_job_skill(req, res) {
   const sql = "SELECT * FROM job_skill WHERE job_skill_id = ?";
   const values = [req.params.job_skill_id];
@@ -705,20 +345,6 @@ function get_job_skill(req, res) {
       res.sendStatus(404);
     } else {
       res.status(200).send(results[0]);
-    }
-  });
-}
-function delete_job_skill(req, res) {
-  const sql = "DELETE FROM job_skill WHERE job_skill_id = ?";
-  const values = [req.params.job_skill_id];
-  db.connectAndQuery({sql, values}, (error, results) => {
-    if(error) {
-      console.error("delete_job_skill: sql err:", error);
-      res.sendStatus(500);
-    } else if(results.affectedRows < 1) {
-      res.sendStatus(404);
-    } else {
-      res.sendStatus(200);
     }
   });
 }

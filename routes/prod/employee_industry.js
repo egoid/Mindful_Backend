@@ -15,7 +15,7 @@ router.post('/1/employee_industry', create_employee_industry);
 router.delete('/1/employee_industry/:employee_industry_id', delete_employee_industry);
 
 function create_employee_industry(req, res) {
-  const employee_id = req.body.employee_id;
+  const employee_id = req.user.employee_id;
   const industry_id = req.body.industry_id;
 
   if(!employee_id || !industry_id) {
@@ -34,8 +34,10 @@ function create_employee_industry(req, res) {
   }
 }
 function delete_employee_industry(req, res) {
-  const sql = "DELETE FROM employee_interested_industry WHERE employee_industry_id=?";
-  const values = [req.params.employee_industry_id];
+  const sql = "DELETE FROM employee_interested_industry " +
+              "WHERE employee_industry_id=? AND employee_id=?";
+  const values = [req.params.employee_industry_id, req.user.employee_id];
+  
   db.connectAndQuery({sql, values}, (error, results) => {
     if(error) {
       console.error("delete_employee_industry: sql err:", error);

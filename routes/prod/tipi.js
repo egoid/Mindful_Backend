@@ -17,7 +17,7 @@ router.put('/1/tipi/:tipi_id', update_tipi);
 router.delete('/1/tipi/:tipi_id', delete_tipi);
 
 function create_tipi(req, res) {
-  const employee_id = req.body.employee_id;
+  const employee_id = req.user.employee_id;
 
   if(!employee_id) {
     res.sendStatus(400);
@@ -44,8 +44,8 @@ function create_tipi(req, res) {
   }
 }
 function get_tipi(req, res) {
-  const sql = "SELECT * FROM tipi_score WHERE tipi_score_id = ?";
-  const values = [req.params.tipi_score_id];
+  const sql = "SELECT * FROM tipi_score WHERE tipi_score_id = ? AND employee_id = ?";
+  const values = [req.params.tipi_score_id, req.user.employee_id];
 
   db.connectAndQuery({sql, values}, (error, results) => {
     if(error) {
@@ -67,10 +67,10 @@ function update_tipi(req, res) {
 
   const sql = "UPDATE tipi_score " +
   "extraversion=?, agreeableness=?, conscientiousness=?, " +
-  " emotional_stability=?, openness_to_experiences=? WHERE tipi_score_id=?";
+  " emotional_stability=?, openness_to_experiences=? WHERE tipi_score_id=? AND employee_id=?";
   const values = [extraversion, agreeableness, conscientiousness,
                   emotional_stability, openness_to_experiences,
-                  req.params.tipi_score_id];
+                  req.params.tipi_score_id, req.user.employee_id];
 
   db.connectAndQuery({sql, values}, (error, results) => {
     if(error) {
@@ -84,8 +84,8 @@ function update_tipi(req, res) {
   });
 }
 function delete_tipi(req, res) {
-  const sql = "DELETE FROM tipi_score WHERE tipi_score_id=?";
-  const values = [req.params.tipi_score_id];
+  const sql = "DELETE FROM tipi_score WHERE tipi_score_id=? AND employee_id=?";
+  const values = [req.params.tipi_score_id, req.user.employee_id];
   db.connectAndQuery({sql, values}, (error, results) => {
     if(error) {
       console.error("delete_tipi: sql err:", error);

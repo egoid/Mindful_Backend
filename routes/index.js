@@ -27,7 +27,13 @@ function require_session_key(req,res,next) {
   if (!session_key) {
     res.status(403).send("X-Yobs-User-Session-Key header or user_session_key cookie is required");
   } else {
-    const sql = "SELECT user.* FROM user JOIN user_session USING(user_id) WHERE user_session_key = ?";
+    const sql = "SELECT user.*, employer.employer_id, employee.employee_id " +
+                "FROM user " +
+                "JOIN user_session USING(user_id) " +
+                "LEFT JOIN employee USING(user_id) " +
+                "LEFT JOIN employer USING(user_id) " +
+                "WHERE user_session_key = ?";
+
     const values = [session_key];
     db.connectAndQuery({sql, values}, (err, results) => {
       if(err) {
