@@ -7,96 +7,111 @@
 * For POST and PUT, all variables are listed and should be sent as either FormData or JSON
 * For GET endpoints, the data is returned identically as it is represented in the database
 
-# User Endpoints #
+# Admin Endpoints - Currently Unavailable (all URL prefix with "admin") #
+* get - '/1/company'
+* get - '/1/company/:company_id'
+* get - '/1/employer/:employer_id'
+* get - '/1/industry/:industry_id'
+* get - '/1/job_schedule/:job_sched_id'
+* get - '/1/job_skill/:job_skill_id'
+* get - '/1/job/:job_id'
+* get - '/1/gen_job_latlong'
+* get - '/1/school/:school_id'
+* get - '/1/shift_type/:shift_type_id'
+* get - '/1/skill_type/:skill_type_id'
+* get - '/1/user_role/:user_role_id'
+* get - '/1/user_type/:user_role_id'
+
+* post - '/1/company'
+* post - '/1/employer'
+* post - '/1/industry'
+* post - '/1/job/:job_id/schedule'
+  * schedule (list)
+      * Seven-item list, sunday is 0, each value should be one of ['all','none','morning','afternoon','evening','night']
+* post - '/1/job_schedule/:job_sched_id'
+  * schedule (list)
+      * Seven-item list, sunday is 0, each value should be one of ['all','none','morning','afternoon','evening','night']
+* post - '/1/job/:job_id/skill'
+* post - '/1/job'
+  * company
+      * id
+      * name
+      * industry
+          * id (optional)
+          * name => industry_name
+          * type => industry_type
+      * email_domain
+      * property_bag (JSON)
+  * job_role
+      * id (optional)
+      * name => job_role_name
+      * type => job_role_descr
+  * job_type
+      * id (optional)
+      * name => job_type_name
+      * type => job_type_descr
+  * name
+  * title
+  * employer_id
+  * location
+  * pay_rate_min
+  * pay_rate_max
+  * min_gpa
+  * description
+  * external_url
+  * posted_at
+  * takedown_at
+* post - '/1/job/:job_id'
+* post - '/1/job_role'
+* post - '/1/job_type'
+* post - '/1/school'
+* post - '/1/shift_type'
+* post - '/1/skill_type'
+* post - '/1/user_role'
+* post - '/1/user_type'
+
+* put - '/1/employer/:employer_id'
+* put - '/1/industry/:industry_id'
+* put - '/1/school/:school_id'
+* put - '/1/shift_type/:shift_type_id'
+* put - '/1/skill_type/:skill_type_id'
+* put - '/1/user_role/:user_role_id'
+* put - '/1/user_type/:user_role_id'
+
+* delete - '/1/employer/:employer_id'
+* delete - '/1/industry/:industry_id'
+* delete - '/1/job_schedule/:job_sched_id'
+* delete - '/1/job_skill/:job_skill_id'
+* delete - '/1/job/:job_id'
+* delete - '/1/school/:school_id'
+* delete - '/1/shift_type/:shift_type_id'
+* delete - '/1/skill_type/:skill_type_id'
+* delete - '/1/user_role/:user_role_id'
+* delete - '/1/user_type/:user_role_id'
+
+# Pre-Auth/Session Endpoints #
 * post - '/1/user/register'
     * email
     * password
     * user_type is one of ['employee','employer free','employer_paid_1','employer_paid_2']
         * defaults to "employee"
     * user_role_id
-* get - '/1/user/current'
-
-# User Role Endpoints #
-* post - '/1/user_role'
-    * name => user_role_name
-    * type => user_role_descr
-* get - '/1/user_role/:user_role_id'
-* put - '/1/user_role/:user_role_id'
-    * name => user_role_name
-    * type => user_role_descr
-* delete - '/1/user_role/:user_role_id'
-
-# Login/Logout Endpoint #
 * post - '/1/user/login'
     * email
     * password
 * get - '/1/user/logout'
 
+# User Endpoints #
+* get - '/1/user/current'
+
 # Company Endpoints #
-* post - '/1/company'
-    * name
-    * industry
-        * id (optional)
-        * name => industry_name
-        * type => industry_type
-    * email_domain
-    * property_bag (JSON)
 * get - '/1/company/:company_id', get_company);
 
 # Single Job Endpoints #
-* post - '/1/job'
-    * company
-        * id
-        * name
-        * industry
-            * id (optional)
-            * name => industry_name
-            * type => industry_type
-        * email_domain
-        * property_bag (JSON)
-    * job_role
-        * id (optional)
-        * name => job_role_name
-        * type => job_role_descr
-    * job_type
-        * id (optional)
-        * name => job_type_name
-        * type => job_type_descr
-    * name
-    * title
-    * employer_id
-    * location
-    * pay_rate_min
-    * pay_rate_max
-    * min_gpa
-    * description
-    * external_url
-    * posted_at
-    * takedown_at
 * get - '/1/job/:job_id'
-* put - '/1/job/:job_id'
-    * name
-    * title
-    * employer_id
-    * location
-    * pay_rate_min
-    * pay_rate_max
-    * min_gpa
-    * description
-    * external_url
-    * posted_at
-    * takedown_at
-* delete - '/1/job/:job_id'
 
 # Single Job Schedule Endpoints #
-* post - '/1/job/:job_id/schedule'
-    * schedule (list)
-        * Seven-item list, sunday is 0, each value should be one of ['all','none','morning','afternoon','evening','night']
 * get - '/1/job_schedule/:job_sched_id'
-* put - '/1/job_schedule/:job_sched_id'
-    * schedule (list)
-        * Seven-item list, sunday is 0, each value should be one of ['all','none','morning','afternoon','evening','night']
-* delete - '/1/job_schedule/:job_sched_id'
 
 # Single Job Skill Endpoints #
 * post - '/1/job/:job_id/skill'
