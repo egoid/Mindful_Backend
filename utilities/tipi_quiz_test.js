@@ -4,8 +4,8 @@ const http = require("http");
 const util = require('util');
 
 const HTTP_OPTIONS = {
-  hostname: 'stage-api.yobs.io',
-  port: 80,
+  hostname: 'localhost',
+  port: 3020,
   path: '/client/1/employee/tipi/quiz',
   method: 'POST',
   headers: {
