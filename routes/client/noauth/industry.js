@@ -1,13 +1,7 @@
 'use strict';
 
-const _ = require('lodash');
-const async = require('async');
 const express = require('express');
-
-const db = require('../../mysql_db_prod.js');
-const session = require('../../session.js');
-const util = require('../../util.js');
-const industry_util = require('../industry.js');
+const db = require('../../../mysql_db_prod.js');
 
 const router = new express.Router();
 exports.router = router;

@@ -26,6 +26,7 @@
     "mysql": "*",
     "node-config-sets": "*",
     "node-geocoder": "*",
+    "nodemailer": "*",
     "pg": "^6.0.3"
   }
 }

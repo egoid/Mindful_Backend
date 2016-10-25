@@ -4,7 +4,7 @@ const http = require("http");
 const HTTP_OPTIONS = {
   hostname: 'localhost',
   port: 3020,
-  path: '/1/user/login',
+  path: '/client/1/user/login',
   method: 'POST',
   headers: {
     'Accept': 'application/json',

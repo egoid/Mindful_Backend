@@ -3,17 +3,13 @@
 const _ = require('lodash');
 const async = require('async');
 const express = require('express');
-
 const db = require('../../mysql_db_prod.js');
-const session = require('../../session.js');
-const util = require('../../util.js');
 
 const router = new express.Router();
 exports.router = router;
 
 router.post('/1/shift_type', create_shift_type);
-router.get('/1/shift_type/:shift_type_id', get_shift_type);
-router.put('/1/shift_type/:shift_type_id', update_shift_type);
+router.post('/1/shift_type/:shift_type_id', update_shift_type);
 router.delete('/1/shift_type/:shift_type_id', delete_shift_type);
 
 function create_shift_type(req, res) {
@@ -56,18 +52,6 @@ function create_shift_type(req, res) {
       res.sendStatus(500);
     } else {
       res.status(200).send(shift_type_id);
-    }
-  });
-}
-function get_shift_type(req, res) {
-  const sql = "SELECT * FROM shift_type WHERE shift_type_id = ?";
-  const values = [req.params.shift_type_id];
-  db.connectAndQuery({sql, values}, (error, results) => {
-    if(error) {
-      console.error("get_shift_type: sql err:", error);
-      res.sendStatus(500);
-    } else {
-      res.status(200).send(results[0]);
     }
   });
 }

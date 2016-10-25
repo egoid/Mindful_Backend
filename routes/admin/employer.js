@@ -20,28 +20,9 @@ const GOOGLE_GEO_CONFIG = {
 const geocoder = NodeGeocoder(GOOGLE_GEO_CONFIG);
 
 router.post('/1/employer', create_employer);
-router.get('/1/employer/:employer_id', get_employer);
-router.put('/1/employer/:employer_id', update_employer);
+router.post('/1/employer/:employer_id', update_employer);
 router.delete('/1/employer/:employer_id', delete_employer);
 
-function get_employer(req, res) {
-  const sql = "SELECT employer.*, user.alias AS employee_name " +
-              "FROM employer " +
-              "JOIN user USING(user_id) " +
-              "WHERE employer_id = ?";
-  const values = [req.params.employer_id];
-
-  db.connectAndQuery({sql, values}, (error, results) => {
-    if(error) {
-      console.error("get_employer: sql err:", error);
-      res.sendStatus(500);
-    } else if(results.length < 1) {
-      res.sendStatus(404);
-    } else {
-      res.status(200).send(results[0]);
-    }
-  });
-}
 function create_employer(req, res) {
   const user_id = req.body.user_id;
   if(!user_id) {

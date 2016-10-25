@@ -31,8 +31,8 @@ app.use(body_parser.urlencoded({ extended: false }));
 app.use(multipart());
 app.use(cookie_parser());
 app.use(method_override());
-app.use(routes.router);
 app.use(my_error_handler);
+app.use(routes.router);
 
 http.createServer(app).listen(app.get('port'),function() {
   console.log('Express server listening on port ' + app.get('port'));

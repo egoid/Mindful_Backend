@@ -6,7 +6,7 @@ const util = require('util');
 const HTTP_OPTIONS = {
   hostname: 'localhost',
   port: 3020,
-  path: '/client/1/user/current',
+  path: '/client/1/employee/skill',
   method: 'GET',
   headers: {
     'Accept': 'application/json',

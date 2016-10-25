@@ -22,7 +22,7 @@ exports.router = router;
 
 router.post('/1/school', create_school);
 router.get('/1/school/:school_id', get_school);
-router.put('/1/school/:school_id', update_school);
+router.post('/1/school/:school_id', update_school);
 router.delete('/1/school/:school_id', delete_school);
 
 function create_school(req, res) {

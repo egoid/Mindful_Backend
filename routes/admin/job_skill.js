@@ -7,7 +7,6 @@ const router = new express.Router();
 exports.router = router;
 
 router.post('/1/job/:job_id/skill', create_job_skill);
-router.get('/1/job_skill/:job_skill_id', get_job_skill)
 router.delete('/1/job_skill/:job_skill_id', delete_job_skill);
 
 function create_job_skill(req, res) {
@@ -22,20 +21,6 @@ function create_job_skill(req, res) {
       res.sendStatus(500);
     } else {
       res.status(200).send(results.insertId);
-    }
-  });
-}
-function get_job_skill(req, res) {
-  const sql = "SELECT * FROM job_skill WHERE job_skill_id = ?";
-  const values = [req.params.job_skill_id];
-  db.connectAndQuery({sql, values}, (error, results) => {
-    if(error) {
-      console.error("get_job_skill: sql err:", error);
-      res.sendStatus(500);
-    } else if(results.length < 1) {
-      res.sendStatus(404);
-    } else {
-      res.status(200).send(results[0]);
     }
   });
 }

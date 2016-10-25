@@ -5,20 +5,16 @@ const async = require('async');
 const express = require('express');
 
 const db = require('../../mysql_db_prod.js');
-const session = require('../../session.js');
-const util = require('../../util.js');
-const company_util = require('../company.js');
 
 const router = new express.Router();
 exports.router = router;
 
-router.get('/1/company', get_companies);
-router.get('/1/company/:company_id', get_company);
 router.post('/1/company', create_company);
 
 function create_company(req, res) {
   let company_id;
   let connection;
+  const company_def = req.body;
 
   async.series([
     (done) => {
@@ -31,13 +27,36 @@ function create_company(req, res) {
       });
     },
     (done) => {
-      company_util.create_company(req.body, connection, (error, id) => {
+      const sql = "SELECT company_id FROM company WHERE name = ?";
+      const values = [company_def.name];
+      db.queryWithConnection(connection, sql, values, (error, results) => {
         if(error) {
-          console.error(error);
+          console.error("_create_company: sql err:", error);
+        } else if(results.length > 0) {
+          company_id = results[0].company_id;
         }
-        company_id = id;
         done(error);
       });
+    },
+    (done) => {
+      if(!company_id) {
+        const sql = "INSERT INTO company (name, industry_id, email_domain, property_bag) VALUES (?,?,?,?)";
+        const values = [company_def.name,
+                        company_def.industry_id,
+                        company_def.email_domain,
+                        JSON.stringify(company_def.property_bag)];
+
+        db.queryWithConnection(connection, sql , values, (error, results) => {
+          if(error) {
+            console.error("create_company: sql err:", error);
+          } else {
+            company_id = results.insertId;
+          }
+          done(error);
+        });
+      } else {
+        done();
+      }
     },
     (done) => {
       db.commit(connection, done);
@@ -46,38 +65,9 @@ function create_company(req, res) {
   (error) => {
     if(error) {
       db.rollback(connection);
-      res.status(500).send({ error });
+      res.status(500);
     } else {
       res.status(200).send({ id: company_id });
-    }
-  });
-}
-function get_company(req, res) {
-  const company_id = req.params.company_id;
-  const sql = "SELECT * FROM company WHERE company_id = ?";
-  const values = [company_id];
-  db.connectAndQuery({sql, values}, (error, results) => {
-    if(error) {
-      res.sendStatus(500);
-    } else if(results.length < 1) {
-      res.sendStatus(404);
-    } else {
-      res.status(200).send(results[0]);
-    }
-  });
-}
-function get_companies(req, res) {
-  const sql = "SELECT * FROM company";
-  const values = [];
-  const final_results = [];
-  db.connectAndQuery({sql, values}, (error, results) => {
-    if(error) {
-      res.sendStatus(500);
-    } else {
-      _.each(results, (result) => {
-        final_results.push(result);
-      });
-      res.status(200).send(final_results);
     }
   });
 }

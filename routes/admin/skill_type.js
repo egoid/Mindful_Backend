@@ -12,8 +12,7 @@ const router = new express.Router();
 exports.router = router;
 
 router.post('/1/skill_type', create_skill_type);
-router.get('/1/skill_type/:skill_type_id', get_skill_type);
-router.put('/1/skill_type/:skill_type_id', update_skill_type);
+router.post('/1/skill_type/:skill_type_id', update_skill_type);
 router.delete('/1/skill_type/:skill_type_id', delete_skill_type);
 
 function create_skill_type(req, res) {
@@ -56,20 +55,6 @@ function create_skill_type(req, res) {
       res.sendStatus(500);
     } else {
       res.status(200).send(skill_type_id);
-    }
-  });
-}
-function get_skill_type(req, res) {
-  const sql = "SELECT * FROM skill_type WHERE skill_type_id = ?";
-  const values = [req.params.skill_type_id];
-  db.connectAndQuery({sql, values}, (error, results) => {
-    if(error) {
-      console.error("get_skill_type: sql err:", error);
-      res.sendStatus(500);
-    } else if(results.length < 1) {
-      res.sendStatus(404);
-    } else {
-      res.status(200).send(results[0]);
     }
   });
 }

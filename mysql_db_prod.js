@@ -51,11 +51,18 @@ function getConnection(done) {
     done(error, connection);
   });
 }
-function queryWithConnection(connection, sql, values, callback) {
+function queryWithConnection(connection, sql, values, options, callback) {
+  if(typeof options == 'function') {
+    callback = options;
+    options = {};
+  }
+
   const opts = {
     sql,
     timeout: TIMEOUT_MS,
+    nestTables: options.nestTables,
   };
+
   connection.query(opts, values, callback);
 }
 function queryAndGetConnection(opts, callback) {
@@ -66,7 +73,7 @@ function queryAndGetConnection(opts, callback) {
     if(error) {
       callback(error);
     } else {
-      queryWithConnection(connection, sql, values, (error, results) => {
+      queryWithConnection(connection, sql, values, opts, (error, results) => {
         callback(error, results, connection);
       });
     }

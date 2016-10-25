@@ -1,23 +1,9 @@
 'use strict';
 
-const _ = require('lodash');
-const async = require('async');
 const express = require('express');
-const NodeGeocoder = require('node-geocoder');
-
-const db = require('../../mysql_db_prod.js');
-const util = require('../../util.js');
-
+const db = require('../../../../mysql_db_prod.js');
 const router = new express.Router();
 exports.router = router;
-
-const GOOGLE_GEO_CONFIG = {
-  apiKey: 'AIzaSyAJwf4JXpI9MRGuZdYcOFT9-nq5lzbuPKI',
-  formatter: null,
-  httpAdapter: 'https',
-  provider: 'google',
-};
-const geocoder = NodeGeocoder(GOOGLE_GEO_CONFIG);
 
 router.get('/1/employer', get_employer);
 router.get('/1/employer/job', get_employer_jobs_by_employer);

@@ -8,8 +8,7 @@ const router = new express.Router();
 exports.router = router;
 
 router.post('/1/user_type', create_user_type);
-router.get('/1/user_type/:user_role_id', get_user_type);
-router.put('/1/user_type/:user_role_id', update_user_type);
+router.post('/1/user_type/:user_role_id', update_user_type);
 router.delete('/1/user_type/:user_role_id', delete_user_type);
 
 function create_user_type(req, res) {
@@ -21,20 +20,6 @@ function create_user_type(req, res) {
       res.sendStatus(500);
     } else {
       res.status(200).send({id: results.insertId});
-    }
-  });
-}
-function get_user_type(req, res) {
-  const sql = "SELECT * FROM user_type WHERE user_type_id = ?";
-  const values = [req.body.user_type_id];
-  db.connectAndQuery({sql, values}, (error, results) => {
-    if(error) {
-      console.error("create_user_type: sql err:", error);
-      res.sendStatus(500);
-    } else if(results.length < 1) {
-      res.sendStatus(404);
-    } else {
-      res.status(200).send(results[0]);
     }
   });
 }

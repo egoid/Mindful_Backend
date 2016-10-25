@@ -6,14 +6,16 @@ const util = require('util');
 const HTTP_OPTIONS = {
   hostname: 'localhost',
   port: 3020,
-  path: '/client/1/user/current',
-  method: 'GET',
+  path: '/client/1/employee/skill',
+  method: 'POST',
   headers: {
     'Accept': 'application/json',
     'Content-Type': 'application/json',
     'X-Yobs-User-Session-Key': '3IR0fW92r538Z5+pVnlz12mnCM+ttife',
   }
 };
+
+const payload = { skill_type_id: 2 };
 
 const req = http.request(HTTP_OPTIONS, function(res) {
   console.log('STATUS: ' + res.statusCode);
