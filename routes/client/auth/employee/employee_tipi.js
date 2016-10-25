@@ -3,6 +3,7 @@
 const async = require('async');
 const express = require('express');
 const db = require('../../../../mysql_db_prod.js');
+const exec = require('child_process').exec;
 
 const router = new express.Router();
 exports.router = router;
@@ -114,5 +115,20 @@ function delete_tipi(req, res) {
 }
 
 function tipi_quiz(req, res) {
-  res.sendStatus(403);
+  const answers = req.body;
+  answers.unshift(0);
+
+  const cmd = "execs/ipip " + JSON.stringify(answers);
+  exec(cmd, (err, stdout, stderr) => {
+    if(err) {
+      console.error(err);
+      res.sendStatus(500);
+    } else if(stderr) {
+      console.error(stderr);
+      res.sendStatus(500);
+    } else {
+      const output = JSON.parse(stdout);
+      res.sendStatus(200);
+    }
+  });
 }

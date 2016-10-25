@@ -47,6 +47,7 @@
 * post - '/1/employee/skill'
 * post - '/1/employee/schedule'
 * post - '/1/employee/tipi'
+* post - '/1/employee/tipi/quiz'
 * post - '/1/employee/job/:employee_job_id'
 * post - '/1/employee/schedule/:employee_sched_id'
 
