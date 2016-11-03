@@ -6,7 +6,7 @@ const util = require('util');
 const HTTP_OPTIONS = {
   hostname: 'localhost',
   port: 3020,
-  path: '/client/1/employee/tipi/quiz',
+  path: '/client/1/employee/schedule',
   method: 'POST',
   headers: {
     'Accept': 'application/json',
@@ -15,7 +15,7 @@ const HTTP_OPTIONS = {
   }
 };
 
-const payload = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20];
+const payload = { schedule: ['none','all','all','all','all','all','none'] };
 
 const req = http.request(HTTP_OPTIONS, function(res) {
   console.log('STATUS: ' + res.statusCode);

@@ -44,7 +44,7 @@ function create_employee_sched(req, res) {
     });
 
     const sql = "INSERT INTO employee_schedule " +
-                "(sunday_schedule, monday_schedule, " +
+                "(employee_id, sunday_schedule, monday_schedule, " +
                 " tuesday_schedule, wednesday_schedule, thursday_schedule, " +
                 " friday_schedule, saturday_schedule) VALUES " +
                 "(?, ?, ?, ?, ?, ?, ?, ?)";

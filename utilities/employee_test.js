@@ -6,17 +6,16 @@ const util = require('util');
 const HTTP_OPTIONS = {
   hostname: 'localhost',
   port: 3020,
-  path: '/client/1/employee/tipi/quiz',
+  path: '/client/1/employee',
   method: 'POST',
   headers: {
     'Accept': 'application/json',
     'Content-Type': 'application/json',
-    'X-Yobs-User-Session-Key': 'PRABA6YSg2v7C1c2w3fDnTuLlyIyYK0y',
+    'X-Yobs-User-Session-Key': 'hhKqV25qYitqsR/aL2zqpGnfJkrUPdw+',
   }
 };
 
-const payload = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20];
-
+const payload = { };
 const req = http.request(HTTP_OPTIONS, function(res) {
   console.log('STATUS: ' + res.statusCode);
   console.log('HEADERS: ' + JSON.stringify(res.headers));

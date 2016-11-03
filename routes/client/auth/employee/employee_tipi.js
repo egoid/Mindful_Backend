@@ -14,6 +14,47 @@ router.get('/1/employee/tipi', get_employee_tipi);
 router.post('/1/employee/tipi', create_tipi);
 router.delete('/1/employee/tipi/:tipi_id', delete_tipi);
 
+function _create_tipi_entry(connection, employee_id, scores, all_done) {
+  let tipi_score_id;
+
+  async.series([
+    (done) => {
+      const values = {
+        extraversion: scores.extraversion || 0,
+        agreeableness: scores.agreeableness || 0,
+        conscientiousness: scores.conscientiousness || 0,
+        emotional_stability: scores.emotional_stability || 0,
+        openness_to_experiences: scores.openness_to_experiences || 0
+      };
+      const sql = "INSERT INTO tipi_score SET ?";
+
+      db.queryWithConnection(connection, sql, values, (err, results) => {
+        if(err) {
+          console.error("_create_tipi_entry: sql err:", err);
+        } else {
+          tipi_score_id = results.insertId;
+        }
+        done(err);
+      });
+    },
+    (done) => {
+      const sql = "UPDATE employee SET tipi_score_id = ? WHERE employee_id = ?";
+      const values = [tipi_score_id, employee_id];
+      db.queryWithConnection(connection, sql, values, (err, results) => {
+        if(err) {
+          console.error("_create_tipi_entry: sql err:", err);
+        } else if(results.affectedRows < 1) {
+          err = '404';
+        }
+        done(err);
+      });
+    }
+  ],
+  (err) => {
+    all_done(err, tipi_score_id);
+  });
+}
+
 function get_employee_tipi(req, res) {
   const sql = "SELECT tipi_score.* " +
               "FROM tipi_score " +
@@ -52,33 +93,11 @@ function create_tipi(req, res) {
         });
       },
       (done) => {
-        const values = {
-          extraversion: req.body.extraversion || 0,
-          agreeableness: req.body.agreeableness || 0,
-          conscientiousness: req.body.conscientiousness || 0,
-          emotional_stability: req.body.emotional_stability || 0,
-          openness_to_experiences: req.body.openness_to_experiences || 0
-        };
-        const sql = "INSERT INTO tipi_score SET ?";
-
-        db.queryWithConnection(connection, sql, values, (err, results) => {
+        _create_tipi_entry(connection, employee_id, req.body, (err, result) => {
           if(err) {
-            console.error("create_tipi: sql err:", err);
-          } else {
-            tipi_score_id = results.insertId;
+            console.error("create_tipi: error:", err);
           }
-          done(err);
-        });
-      },
-      (done) => {
-        const sql = "UPDATE employee SET tipi_score_id = ? WHERE employee_id = ?";
-        const values = [tipi_score_id, employee_id];
-        db.queryWithConnection(connection, sql, values, (err, results) => {
-          if(err) {
-            console.error("create_tipi: sql err:", err);
-          } else if(results.affectedRows < 1) {
-            err = '404';
-          }
+          tipi_score_id = result;
           done(err);
         });
       },
@@ -128,7 +147,51 @@ function tipi_quiz(req, res) {
       res.sendStatus(500);
     } else {
       const output = JSON.parse(stdout);
-      res.sendStatus(200);
+      const tipi_values = {
+        extraversion: output.E ? output.E.score : 0,
+        agreeableness: output.A ? output.A.score : 0,
+        conscientiousness: output.C ? output.C.score : 0,
+        emotional_stability: output.N ? output.N.score : 0,
+        openness_to_experiences: output.I ? output.I.score : 0
+      };
+
+      let tipi_score_id;
+      let connection; 
+
+      async.series([
+        (done) => {
+          db.getConnection((err, conn) => {
+            if(err) {
+              console.error("tipi_quiz: sql err:", err);
+            }
+            connection = conn;
+            done(err);
+          });
+        },
+        (done) => {
+          _create_tipi_entry(connection, req.user.employee_id, tipi_values, (err, result) => {
+            if(err) {
+              console.error("tipi_quiz: error:", err);
+            }
+            tipi_score_id = result;
+            done(err);
+          });
+        },
+        (done) => {
+          db.commit(connection, done);
+        }
+      ],
+      (err) => {
+        if(err == '404') {
+          db.rollback();
+          res.sendStatus(404);
+        } else if(err) {
+          db.rollback();
+          res.sendStatus(500);
+        } else {
+          res.send({id: tipi_score_id });
+        }
+      });
     }
   });
 }

@@ -6,16 +6,14 @@ const util = require('util');
 const HTTP_OPTIONS = {
   hostname: 'localhost',
   port: 3020,
-  path: '/client/1/employee/tipi/quiz',
-  method: 'POST',
+  path: '/client/1/employee/schedule',
+  method: 'GET',
   headers: {
     'Accept': 'application/json',
     'Content-Type': 'application/json',
     'X-Yobs-User-Session-Key': 'PRABA6YSg2v7C1c2w3fDnTuLlyIyYK0y',
   }
 };
-
-const payload = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20];
 
 const req = http.request(HTTP_OPTIONS, function(res) {
   console.log('STATUS: ' + res.statusCode);
@@ -27,5 +25,4 @@ const req = http.request(HTTP_OPTIONS, function(res) {
 });
 
 req.on('error', function(e) { console.log('problem with request: ' + e.message); });
-req.write(JSON.stringify(payload));
 req.end();
