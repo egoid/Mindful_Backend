@@ -110,12 +110,7 @@ function create_employee(req, res) {
   }
 }
 function update_employee(req, res) {
-  const req_employee_id = req.params.employee_id;
   const employee_id = req.user.employee_id;
-
-  if(req_employee_id != employee_id) {
-    res.sendStatus(403);
-  }
 
   const location_name = req.body.location_name || null;
   const UPDATABLE_COLS = [

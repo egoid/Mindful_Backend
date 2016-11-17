@@ -122,9 +122,9 @@ function get_job(req, res) {
               "JOIN job_role USING(job_role_id) " +
               "JOIN job_type USING(job_type_id) " +
               "LEFT JOIN job_schedule USING(job_schedule_id) " +
-              "LEFT JOIN job_skill USING(job_id) " +
+              "LEFT JOIN job_skill ON job_skill.job_id = job.job_id " +
               "LEFT JOIN skill_type ON job_skill.skill_type_id = skill_type.skill_type_id " +
-              "WHERE job_id = ?";
+              "WHERE job.job_id = ?";
     db.connectAndQuery({sql, values: [req.params.job_id], nestTables: true}, (error, results) => {
       if(error) {
         console.error("get_job: sql err:", error);

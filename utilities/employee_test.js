@@ -11,7 +11,7 @@ const HTTP_OPTIONS = {
   headers: {
     'Accept': 'application/json',
     'Content-Type': 'application/json',
-    'X-Yobs-User-Session-Key': 'hhKqV25qYitqsR/aL2zqpGnfJkrUPdw+',
+    'X-Yobs-User-Session-Key': 'hhKqV25qYitqsR/aL2zqpGnfJkrUPdw+atus',
   }
 };
 

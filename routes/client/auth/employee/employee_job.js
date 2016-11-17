@@ -32,14 +32,14 @@ function create_employee_job(req, res) {
   const employee_id = req.user.employee_id;
   const job_id = req.body.job_id;
   const interview_date = req.body.interview_date;
-  let job_status = req.body.status;
+  let status = req.body.status;
 
-  if(EMPLOYEE_JOB_STATUS.indexOf(job_status) < 0) {
-    job_status = NULL;
+  if(EMPLOYEE_JOB_STATUS.indexOf(status) < 0) {
+    status = NULL;
   }
 
   const sql = "INSERT INTO employee_job SET ?";
-  const values = { employee_id, job_id, job_status, interview_date };
+  const values = { employee_id, job_id, status, interview_date };
 
   db.connectAndQuery({sql, values}, (error, results) => {
     if(error) {

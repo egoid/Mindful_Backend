@@ -6,7 +6,7 @@ const util = require('util');
 const HTTP_OPTIONS = {
   hostname: 'localhost',
   port: 3020,
-  path: '/client/1/employee/industry',
+  path: '/client/1/employee/job',
   method: 'POST',
   headers: {
     'Accept': 'application/json',
@@ -15,7 +15,11 @@ const HTTP_OPTIONS = {
   }
 };
 
-const payload = { industry_id: 1 };
+const payload = {
+  job_id: 1,
+  interview_date: new Date(),
+  status: 'saved',
+};
 
 const req = http.request(HTTP_OPTIONS, function(res) {
   console.log('STATUS: ' + res.statusCode);
