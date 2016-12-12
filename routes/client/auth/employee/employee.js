@@ -23,7 +23,7 @@ router.put('/1/employee', update_employee);
 
 /**** EMPLOYEE ENDPOINTS ****/
 function get_employee(req, res) {
-  const sql = "SELECT employee.*, user.alias AS employee_name " +
+  const sql = "SELECT *" +
               "FROM employee " +
               "JOIN user USING(user_id) " +
               "WHERE employee_id=?";

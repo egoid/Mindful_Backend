@@ -1,7 +1,7 @@
 'use strict';
 
 const async = require('async');
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 const crypto = require('crypto');
 const express = require('express');
 const db = require('../../../mysql_db_prod.js');
@@ -93,6 +93,8 @@ function login(req, res) {
   });
 }
 function register(req, res) {
+  const first_name = req.body.first_name;
+  const last_name = req.body.last_name;
   const email = req.body.email;
   const password = req.body.password;
   const user_type = req.body.user_type || 'employee';
@@ -134,7 +136,7 @@ function register(req, res) {
     (done) => {
       bcrypt.hash(password, 10, function(err, hash) {
         if(err) {
-          console.error("register: bcrypt.hash err:", error);
+          console.error("register: bcrypt.hash err:", err);
         }
 
         pw_hash = hash;
@@ -142,8 +144,8 @@ function register(req, res) {
       });
     },
     (done) => {
-      const sql = "INSERT INTO user (email, password, user_type, user_role_id) VALUES (?,?,?,?)";
-      const values = [email, pw_hash, user_type, user_role_id];
+      const sql = "INSERT INTO user (first_name, last_name, email, password, user_type, user_role_id) VALUES (?,?,?,?,?,?)";
+      const values = [first_name, last_name, email, pw_hash, user_type, user_role_id];
       db.queryWithConnection(connection, sql, values, (error, results) => {
         if(error) {
           console.error("register: sql err:", error);

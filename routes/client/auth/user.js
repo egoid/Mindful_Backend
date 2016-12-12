@@ -1,7 +1,7 @@
 'use strict';
 
 const async = require('async');
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 const crypto = require('crypto');
 const express = require('express');
 const nodemailer = require('nodemailer');
