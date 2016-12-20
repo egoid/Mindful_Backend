@@ -8,7 +8,7 @@ var client_routes = require('./client');
 
 exports.router = router;
 
-router.use('/admin', require_admin, admin_routes.router);
+router.use('/admin', admin_routes.router);
 router.use('/client', client_routes.router);
 
 function require_admin(req, res, next) {
