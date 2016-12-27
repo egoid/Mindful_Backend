@@ -3,7 +3,7 @@
 const async = require('async');
 const express = require('express');
 const db = require('../../../../mysql_db_prod.js');
-const exec = require('child_process').exec;
+const tipi = require('../../../../execs/tipi.js');
 
 const router = new express.Router();
 exports.router = router;
@@ -135,63 +135,51 @@ function delete_tipi(req, res) {
 
 function tipi_quiz(req, res) {
   const answers = req.body;
-  answers.unshift(0);
+  const output = tipi(answers);
 
-  const cmd = "execs/ipip " + JSON.stringify(answers);
-  exec(cmd, (err, stdout, stderr) => {
-    if(err) {
-      console.error(err);
-      res.sendStatus(500);
-    } else if(stderr) {
-      console.error(stderr);
-      res.sendStatus(500);
-    } else {
-      const output = JSON.parse(stdout);
-      const tipi_values = {
-        extraversion: output.E ? output.E.score : 0,
-        agreeableness: output.A ? output.A.score : 0,
-        conscientiousness: output.C ? output.C.score : 0,
-        emotional_stability: output.N ? output.N.score : 0,
-        openness_to_experiences: output.I ? output.I.score : 0
-      };
+  const tipi_values = {
+    extraversion: output.E ? output.E.score : 0,
+    agreeableness: output.A ? output.A.score : 0,
+    conscientiousness: output.C ? output.C.score : 0,
+    emotional_stability: output.N ? output.N.score : 0,
+    openness_to_experiences: output.I ? output.I.score : 0
+  };
 
-      let tipi_score_id;
-      let connection; 
+  let tipi_score_id;
+  let connection;
 
-      async.series([
-        (done) => {
-          db.getConnection((err, conn) => {
-            if(err) {
-              console.error("tipi_quiz: sql err:", err);
-            }
-            connection = conn;
-            done(err);
-          });
-        },
-        (done) => {
-          _create_tipi_entry(connection, req.user.employee_id, tipi_values, (err, result) => {
-            if(err) {
-              console.error("tipi_quiz: error:", err);
-            }
-            tipi_score_id = result;
-            done(err);
-          });
-        },
-        (done) => {
-          db.commit(connection, done);
-        }
-      ],
-      (err) => {
-        if(err == '404') {
-          db.rollback();
-          res.sendStatus(404);
-        } else if(err) {
-          db.rollback();
-          res.sendStatus(500);
-        } else {
-          res.send({id: tipi_score_id });
-        }
-      });
-    }
-  });
+  async.series([
+      (done) => {
+        db.getConnection((err, conn) => {
+          if(err) {
+            console.error("tipi_quiz: sql err:", err);
+          }
+          connection = conn;
+          done(err);
+        });
+      },
+      (done) => {
+        _create_tipi_entry(connection, req.user.employee_id, tipi_values, (err, result) => {
+          if(err) {
+            console.error("tipi_quiz: error:", err);
+          }
+          tipi_score_id = result;
+          done(err);
+        });
+      },
+      (done) => {
+        db.commit(connection, done);
+      }
+    ],
+    (err) => {
+      if(err == '404') {
+        db.rollback();
+        res.sendStatus(404);
+      } else if(err) {
+        db.rollback();
+        res.sendStatus(500);
+      } else {
+        res.send({id: tipi_score_id });
+      }
+    });
 }
