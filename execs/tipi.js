@@ -1,3 +1,5 @@
+'use strict'
+
 const narrative = {
   "E": {
     "low": "This indicates you are introverted, reserved, and quiet. You enjoy alone-time and would often prefer it over some big social event. Your socializing tends to be restricted to a few close friends.",

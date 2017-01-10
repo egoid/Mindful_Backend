@@ -8,9 +8,9 @@ const user = require('./user.js');
 
 exports.router = router;
 
-router.use(require_session_key);
-router.use(new RegExp(/\/1\/employee/), require_employee_id);
-router.use(new RegExp(/\/1\/employer/), require_employer_id);
+// router.use(require_session_key);
+// router.use(new RegExp(/\/1\/employee/), require_employee_id);
+// router.use(new RegExp(/\/1\/employer/), require_employer_id);
 
 router.use(employee_routes.router);
 router.use(employer_routes.router);

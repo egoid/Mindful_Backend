@@ -7,71 +7,13 @@ const db = require('../../mysql_db.js');
 const router = new express.Router();
 exports.router = router;
 
-router.get('/1/raw_jobs/job_list/', get_job_list);
-router.get('/1/raw_jobs/role_list/', get_role_list);
-router.get('/1/raw_jobs/company_list/', get_company_list);
-router.put('/1/raw_jobs/:id', update_job);
+router.get('/1/live_jobs', get_live_job_list);
+router.put('/1/live_jobs/:id', update_job);
 
-function get_job_list(req, res) {
+function get_live_job_list(req, res) {
   const category = req.query.job_category;
   const values = [];
-  let sql = "SELECT * from raw_jobs" 
-  if(category){
-    sql += ' WHERE `job_category`= ?';
-    values.push(category);
-  }
-
-  db.connectAndQuery({ sql, values }, (error, results) => {
-    if(error) {
-      console.error(error);
-      res.sendStatus(500);
-    } else {
-      const sorted = {};
-      for(let i in results){
-        let r = results[i];
-        if(!sorted[r.job_category]){
-          sorted[r.job_category] = [];
-        }
-        sorted[r.job_category].push(r);
-      }
-      res.status(200).send(sorted);
-    }
-  });
-}
-
-
-function get_role_list(req, res) {
-  const category = req.query.job_category;
-  const values = [];
-  let sql = "SELECT * from job_role" 
-  if(category){
-    sql += ' WHERE `job_category`= ?';
-    values.push(category);
-  }
-
-  db.connectAndQuery({ sql, values }, (error, results) => {
-    if(error) {
-      console.error(error);
-      res.sendStatus(500);
-    } else {
-      const sorted = {};
-      for(let i in results){
-        let r = results[i];
-        if(!sorted[r.job_category]){
-          sorted[r.job_category] = [];
-        }
-        sorted[r.job_category].push(r);
-      }
-      res.status(200).send(sorted);
-    }
-  });
-}
-
-
-function get_company_list(req, res) {
-  const category = req.query.job_category;
-  const values = [];
-  let sql = "SELECT * from company" 
+  let sql = "SELECT * FROM `job`";
   if(category){
     sql += ' WHERE `job_category`= ?';
     values.push(category);
@@ -96,7 +38,7 @@ function get_company_list(req, res) {
 }
 
 function update_job(req, res) {
-  const sql = "SELECT * FROM `raw_jobs`";
+  const sql = "SELECT * FROM `live_jobs`";
   const id = req.params.id;
   const values = [req.query.job_type];
   db.connectAndQuery({ sql, values }, (error, results) => {

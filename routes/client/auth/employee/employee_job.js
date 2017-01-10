@@ -14,8 +14,10 @@ router.post('/1/employee/job/:employee_job_id', update_employee_job);
 router.delete('/1/employee/job/:employee_job_id', delete_employee_job);
 
 function get_employee_jobs(req, res) {
-  const sql = "SELECT employee_job.*, job.* FROM employee_job JOIN job USING(job_id) WHERE employee_id = ?";
-  const values = [req.user.employee_id];
+  const sql = "select * from job_role"
+  // const sql = "SELECT employee_job.*, job.* FROM employee_job JOIN job USING(job_id) WHERE employee_id = ?";
+  // const values = [req.user.employee_id];
+  const values = [1];
 
   db.connectAndQuery({sql, values}, (error, results) => {
     if(error) {
@@ -24,7 +26,7 @@ function get_employee_jobs(req, res) {
     } else if(results.length < 1) {
       res.sendStatus(404);
     } else {
-      res.status(200).send(results);
+      res.status(200).send(results)
     }
   });
 }
