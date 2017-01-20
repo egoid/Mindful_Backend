@@ -40,9 +40,21 @@
 * get - '/1/employee/skill'
 * get - '/1/employee/tipi'
 * get = '/1/employee/job'
-* get = '/1/employee/job/search'
-* get = '/1/employee/job/more_jobs_by'
+
+* get = '/1/employee/job/search
+            ?query=
+            &radius=bike
+            &location=Los%20Angeles,CA
+            &page_number=
+
+* get = '/1/employee/job/more_jobs_by
+            ?company_id=
+             &radius=bike
+             &location=Los%20Angeles,CA
+             &page_number=
+
 * get = '/1/employee/job/job_list'
+  -returns total length of job list
 
 
 * post - '/1/employee'

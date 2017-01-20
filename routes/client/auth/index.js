@@ -31,7 +31,6 @@ const USER_FIELDS = [
 ];
 
 function require_employer_id(req, res, next) {
-    // next();
   if(req.originalUrl === '/client/1/employer' && req.originalMethod === 'POST') {
     next();
   } else if(!req.user.employer_id || req.user.employer_id < 1) {
@@ -40,7 +39,6 @@ function require_employer_id(req, res, next) {
   }
 }
 function require_employee_id(req, res, next) {
-  // next();
   if(req.originalUrl === '/client/1/employee' && req.originalMethod === 'POST') {
     next();
   } else if(!req.user.employee_id || req.user.employee_id < 1) {
@@ -54,8 +52,7 @@ function require_session_key(req, res, next) {
   var session_key = header_api_key || req.cookies.user_session_key;
 
   if (!session_key) {
-    next();
-    // res.status(403).send("X-Yobs-User-Session-Key header or user_session_key cookie is required");
+    res.status(403).send("X-Yobs-User-Session-Key header or user_session_key cookie is required");
   } else {
     const sql = "SELECT user.*, employer.employer_id, employee.employee_id " +
                 "FROM user " +
