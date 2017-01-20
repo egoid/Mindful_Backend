@@ -39,6 +39,11 @@
 * get - '/1/employee/schedule'
 * get - '/1/employee/skill'
 * get - '/1/employee/tipi'
+* get = '/1/employee/job'
+* get = '/1/employee/job/search'
+* get = '/1/employee/job/more_jobs_by'
+* get = '/1/employee/job/job_list'
+
 
 * post - '/1/employee'
 * post - '/1/employee_industry'

@@ -13,14 +13,17 @@ router.put('/1/live_jobs/:id', update_job);
 
 function publish_live_job(req, res) {
   const job_details = req.body;
-  const sql = "INSERT INTO job (latitude_lower_walk, longitude_lower_walk, latitude_upper_walk, longitude_upper_walk, latitude_lower_bike, longitude_lower_bike, latitude_upper_bike, longitude_upper_bike, latitude_lower_metro, longitude_lower_metro, latitude_upper_metro, longitude_upper_metro, latitude_lower_car, longitude_lower_car, latitude_upper_car, longitude_upper_car, company_id, employer_id, is_deleted, job_role_id, job_type_id, job_schedule_id, title, description, responsibilities, is_yobs_client, external_url, posted_at, deleted_at ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
-  const values = [34.0341, -118.222, 34.0341, -118.222, 34.0341, -118.222, 34.0341, -118.222, 34.0341, -118.222, 34.0341, -118.222, 34.0341, -118.222, 34.0341, -118.222, job_details.company_id , 1, 0, job_details.role_id, 1, 1, job_details.job_title, job_details.job_desc, job_details.summ, 0, job_details.url, job_details.post_date.slice(0,10) , job_details.expiry_date.slice(0,10)  ];
+  console.log(job_details.company_id)
+  console.log(job_details.job_role_id)
+  const sql = "INSERT INTO job (latitude_lower_walk, longitude_lower_walk, latitude_upper_walk, longitude_upper_walk, latitude_lower_bike, longitude_lower_bike, latitude_upper_bike, longitude_upper_bike, latitude_lower_metro, longitude_lower_metro, latitude_upper_metro, longitude_upper_metro, latitude_lower_car, longitude_lower_car, latitude_upper_car, longitude_upper_car, company_id, employer_id, is_deleted, job_role_id, job_type_id, job_schedule_id, title, location, description, responsibilities, activities, is_yobs_client, external_url, posted_at, deleted_at ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+  const values = [34.0341, -118.222, 34.0341, -118.222, 34.0341, -118.222, 34.0341, -118.222, 34.0341, -118.222, 34.0341, -118.222, 34.0341, -118.222, 34.0341, -118.222, job_details.company_id , 1, 0, job_details.job_role_id, 1, 1, job_details.job_title, job_details.job_loc, job_details.job_desc, job_details.job_desc, job_details.job_summ, 0, job_details.url, job_details.post_date.slice(0,10) , job_details.expiry_date.slice(0,10) ];
   db.connectAndQuery({sql, values}, (error, results) => {
     console.log(results)
     if(error) {
       console.error("post_new_job: sql err:", error);
       res.sendStatus(500);
     } else {
+      
       res.status(200).send({'id' : results.insertId });
     }
   });

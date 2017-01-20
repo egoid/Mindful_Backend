@@ -20,13 +20,14 @@ const geocoder = NodeGeocoder(GOOGLE_GEO_CONFIG);
 const EMPLOYEE_JOB_STATUS = ['saved','submitted','reviewed','interview','offer','pass'];
 
 router.get('/1/employee/job', search_job);
+router.get('/1/employee/job/search', query_job);
+router.get('/1/employee/job/more_jobs_by', get_more_jobs);
+router.get('/1/employee/job/job_list', get_joblist_length );
 router.post('/1/employee/job', create_employee_job);
-router.post('/1/employee/job/:employee_job_id', update_employee_job);
+
 router.delete('/1/employee/job/:employee_job_id', delete_employee_job);
 
-
-function search_job(req, res) {
-  console.log(req.query)
+function get_more_jobs(req,res) {
   const search_location = req.body.location || req.query.location;
   const search_string = req.body.search || req.query.search;
   const search_industry = req.body.industry_id || req.query.industry_id;
@@ -69,24 +70,211 @@ function search_job(req, res) {
                   "LEFT JOIN skill_type ON job_skill.skill_type_id = skill_type.skill_type_id "
 
       if(search_industry && (search_industry.length || search_industry >= 1)) {
-        sql += " AND company.industry_id IN (?)";
+        sql += " AND company.industry_id IN (?) ";
         values.push(search_industry);
       }
       if(search_string) {
-        sql += " AND job.title LIKE ?";
+        sql += " AND job.title LIKE ? ";
         values.push('%' + search_string + '%');
       }
       if(search_job_type && (search_job_type.length || search_job_type >= 1)) {
-        sql += " AND job.job_type_id IN (?)";
+        sql += " AND job.job_type_id IN (?) ";
         values.push(search_job_type);
       }
+      if (req.query.company_id) {
+        sql += "WHERE company.company_id = '" + String(req.query.company_id) + "' "
+      }
+      if (req.query.page_number > 1) {
+        sql += " LIMIT " + String(req.query.page_number*25) + " OFFSET "  + String((req.query.page_number-1)*25)
+      } 
+      if(req.query.page_number) {
+        sql += " LIMIT " + String(req.query.page_number*25) 
+      }
+
+      db.connectAndQuery({sql, values, nestTables: true}, (error, results) => {
+        console.log(results)
+        if(error) {
+          console.error("search_job: sql err:", error);
+        } else {
+          result = _make_job_from_results(results);
+        }
+        done(error);
+      });
+    },
+  ],
+  (error) => {
+    if(error) {
+      res.sendStatus(500);
+    } else {
+      res.status(200).send(result);
+    }
+  });
+}
+
+function query_job(req,res) {
+  const search_location = req.body.location || req.query.location;
+  const search_string = req.body.search || req.query.search;
+  const search_industry = req.body.industry_id || req.query.industry_id;
+  const search_job_type = req.body.job_type_id || req.query.job_type_id;
+  let search_radius_label = req.body.radius || req.query.radius;
+
+  let search_lat;
+  let search_long;
+  let search_formatted;
+  let result;
+
+  if(Object.keys(LABEL_TO_RADIUS).indexOf(search_radius_label) < 0) {
+    search_radius_label = 'bike';
+  }
+
+  async.series([
+    (done) => {
+      geocoder.geocode(search_location)
+        .then((res) => {
+          search_formatted = res[0].formattedAddress;
+          search_lat = res[0].latitude;
+          search_long = res[0].longitude;
+          done();
+        })
+        .catch((err) => {
+          console.error("search_job: geocoding err:", err);
+          done(err);
+        });
+    },
+    (done) => {
+      let values = [search_lat, search_lat, search_long, search_long];
+      let sql = "SELECT job.*, company.* , industry.*, job_role.*, job_type.*, job_skill.*, job_schedule.*, skill_type.* " +
+                  "FROM job " +
+                  "JOIN company USING(company_id) " +
+                  "JOIN industry USING(industry_id) " +
+                  "JOIN job_role USING(job_role_id) " +
+                  "JOIN job_type USING(job_type_id) " +
+                  "LEFT JOIN job_schedule USING(job_schedule_id) " +
+                  "LEFT JOIN job_skill ON job_skill.job_id = job.job_id " +
+                  "LEFT JOIN skill_type ON job_skill.skill_type_id = skill_type.skill_type_id "
+
+      if(search_industry && (search_industry.length || search_industry >= 1)) {
+        sql += " AND company.industry_id IN (?) ";
+        values.push(search_industry);
+      }
+      if(search_string) {
+        sql += " AND job.title LIKE ? ";
+        values.push('%' + search_string + '%');
+      }
+      if(search_job_type && (search_job_type.length || search_job_type >= 1)) {
+        sql += " AND job.job_type_id IN (?) ";
+        values.push(search_job_type);
+      }
+      if (req.query.query) {
+        sql += "WHERE ( UPPER(job.title) LIKE UPPER('" + String(req.query.query) + "') || " +
+                        "UPPER(company.name) LIKE UPPER('" + String(req.query.query) + "') || " +
+                        "UPPER(job_role.job_role_name) LIKE UPPER('" + String(req.query.query) + "') )"
+      }
+      if (req.query.page_number > 1) {
+        sql += " LIMIT " + String(req.query.page_number*25) + " OFFSET "  + String((req.query.page_number-1)*25)
+      } 
+      if(req.query.page_number) {
+        sql += " LIMIT " + String(req.query.page_number*25) 
+      }
+
+      db.connectAndQuery({sql, values, nestTables: true}, (error, results) => {
+        console.log(results)
+        if(error) {
+          console.error("search_job: sql err:", error);
+        } else {
+          result = _make_job_from_results(results);
+        }
+        done(error);
+      });
+    },
+  ],
+  (error) => {
+    if(error) {
+      res.sendStatus(500);
+    } else {
+      result.push({'length': result.length})
+      res.status(200).send(result);
+    }
+  });
+}
+
+function get_joblist_length(req, res) {
+  const category = req.query.job_category;
+  const values = [];
+  let sql = "SELECT count(*) FROM job "
+
+  db.connectAndQuery({ sql, values }, (error, results) => {
+    if(error) {
+      console.error(error);
+      res.sendStatus(500);
+    } else {
+      res.status(200).send(results);
+    }
+  });
+}
+
+function search_job(req, res) { 
+  const search_location = req.body.location || req.query.location;
+  const search_string = req.body.search || req.query.search;
+  const search_industry = req.body.industry_id || req.query.industry_id;
+  const search_job_type = req.body.job_type_id || req.query.job_type_id;
+  let search_radius_label = req.body.radius || req.query.radius;
+
+  let search_lat;
+  let search_long;
+  let search_formatted;
+  let result;
+
+  if(Object.keys(LABEL_TO_RADIUS).indexOf(search_radius_label) < 0) {
+    search_radius_label = 'bike';
+  }
+
+  async.series([
+    (done) => {
+      geocoder.geocode(search_location)
+        .then((res) => {
+          search_formatted = res[0].formattedAddress;
+          search_lat = res[0].latitude;
+          search_long = res[0].longitude;
+          done();
+        })
+        .catch((err) => {
+          console.error("search_job: geocoding err:", err);
+          done(err);
+        });
+    },
+    (done) => {
+      let values = [search_lat, search_lat, search_long, search_long];
+      let sql = "SELECT job.*, company.* , industry.*, job_role.*, job_type.*, job_skill.*, job_schedule.*, skill_type.* " +
+                  "FROM job " +
+                  "JOIN company USING(company_id) " +
+                  "JOIN industry USING(industry_id) " +
+                  "JOIN job_role USING(job_role_id) " +
+                  "JOIN job_type USING(job_type_id) " +
+                  "LEFT JOIN job_schedule USING(job_schedule_id) " +
+                  "LEFT JOIN job_skill ON job_skill.job_id = job.job_id " +
+                  "LEFT JOIN skill_type ON job_skill.skill_type_id = skill_type.skill_type_id "
+
+      if(search_industry && (search_industry.length || search_industry >= 1)) {
+        sql += " AND company.industry_id IN (?) ";
+        values.push(search_industry);
+      }
+      if(search_string) {
+        sql += " AND job.title LIKE ? ";
+        values.push('%' + search_string + '%');
+      }
+      if(search_job_type && (search_job_type.length || search_job_type >= 1)) {
+        sql += " AND job.job_type_id IN (?) ";
+        values.push(search_job_type);
+      }
+
+      sql += " LIMIT " + String(req.query.page_number*25) + " OFFSET "  + String((req.query.page_number-1)*25)
 
       db.connectAndQuery({sql, values, nestTables: true}, (error, results) => {
         if(error) {
           console.error("search_job: sql err:", error);
         } else {
           result = _make_job_from_results(results);
-          // console.log(result)
         }
         done(error);
       });
