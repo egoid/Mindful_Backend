@@ -170,6 +170,10 @@ function query_job(req,res) {
                         "UPPER(company.name) LIKE UPPER('" + String(req.query.query) + "') || " +
                         "UPPER(job_role.job_role_name) LIKE UPPER('" + String(req.query.query) + "') )"
       }
+      console.log(req.query.industry)
+      if (req.query.industry) {
+        sql += "WHERE ( job.industry_id LIKE '" + String(req.query.industry) + "')"
+      }      
       if (req.query.page_number > 1) {
         sql += " LIMIT " + String(req.query.page_number*25) + " OFFSET "  + String((req.query.page_number-1)*25)
       } 
@@ -192,7 +196,6 @@ function query_job(req,res) {
     if(error) {
       res.sendStatus(500);
     } else {
-      result.push({'length': result.length})
       res.status(200).send(result);
     }
   });
@@ -245,20 +248,19 @@ function search_job(req, res) {
     },
     (done) => {
       let values = [search_lat, search_lat, search_long, search_long];
-      let sql = "SELECT job.*, company.* , industry.*, job_role.*, job_type.*, job_skill.*, job_schedule.*, skill_type.* " +
+      let sql = "SELECT job.*, company.* , job_role.*, job_type.*, job_skill.*, job_schedule.*, skill_type.* " +
                   "FROM job " +
                   "JOIN company USING(company_id) " +
-                  "JOIN industry USING(industry_id) " +
                   "JOIN job_role USING(job_role_id) " +
                   "JOIN job_type USING(job_type_id) " +
                   "LEFT JOIN job_schedule USING(job_schedule_id) " +
                   "LEFT JOIN job_skill ON job_skill.job_id = job.job_id " +
                   "LEFT JOIN skill_type ON job_skill.skill_type_id = skill_type.skill_type_id "
 
-      if(search_industry && (search_industry.length || search_industry >= 1)) {
-        sql += " AND company.industry_id IN (?) ";
-        values.push(search_industry);
-      }
+      // if(search_industry && (search_industry.length || search_industry >= 1)) {
+      //   sql += " AND company.industry_id IN (?) ";
+      //   values.push(search_industry);
+      // }
       if(search_string) {
         sql += " AND job.title LIKE ? ";
         values.push('%' + search_string + '%');
@@ -388,12 +390,12 @@ const JOB_KEYS = [
   'is_deleted',
   'location',
   'latitude',
-  'longitude'
+  'longitude',
+  'industry_id',
 ];
 const COMPANY_KEYS = [
   'company_id',
   'name',
-  'industry_id',
   'email_domain',
   'property_bag',
   'is_deleted',
