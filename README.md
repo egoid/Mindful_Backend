@@ -43,7 +43,9 @@
 
 * get - '/1/employee/job/search
 
-            ?query=
+            ?
+            (optional)query=
+            (optional)industry=
             &radius=bike
             &location=Los%20Angeles,CA
             &page_number=
