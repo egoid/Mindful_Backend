@@ -18,6 +18,7 @@ const GOOGLE_GEO_CONFIG = {
 const geocoder = NodeGeocoder(GOOGLE_GEO_CONFIG);
 
 router.get('/1/jobs', search_job);
+router.get('/1/jobs/job_list_length', get_joblist_length);
 router.get('/1/job/:job_id', get_job);
 router.get('/1/job_roles', get_job_roles);
 
@@ -74,7 +75,27 @@ const LABEL_TO_RADIUS = {
   metro: 8,
   car: 8
 };
-
+function get_joblist_length(req, res) {
+  const category = req.query.job_category;
+  const values = [];
+  let sql = "SELECT count(*) FROM job "
+  if (req.query.query) {
+    sql += "WHERE ( UPPER(job.title) LIKE UPPER('" + String(req.query.query) + "') || " +
+                    "UPPER(company.name) LIKE UPPER('" + String(req.query.query) + "') || " +
+                    "UPPER(job_role.job_role_name) LIKE UPPER('" + String(req.query.query) + "') )"
+  };
+  if (req.query.industry) {
+    sql += "WHERE ( job.industry_id LIKE '" + String(req.query.industry) + "')"
+  };
+  db.connectAndQuery({ sql, values }, (error, results) => {
+    if(error) {
+      console.error(error);
+      res.sendStatus(500);
+    } else {
+      res.status(200).send(results);
+    }
+  });
+};
 function _make_job_from_results(results) {
   let result = [];
   let job_ids = {}
@@ -153,19 +174,19 @@ function search_job(req, res) {
   }
 
   async.series([
-    (done) => {
-      geocoder.geocode(search_location)
-        .then((res) => {
-          search_formatted = res[0].formattedAddress;
-          search_lat = res[0].latitude;
-          search_long = res[0].longitude;
-          done();
-        })
-        .catch((err) => {
-          console.error("search_job: geocoding err:", err);
-          done(err);
-        });
-    },
+    // (done) => {
+    //   geocoder.geocode(search_location)
+    //     .then((res) => {
+    //       search_formatted = res[0].formattedAddress;
+    //       search_lat = res[0].latitude;
+    //       search_long = res[0].longitude;
+    //       done();
+    //     })
+    //     .catch((err) => {
+    //       console.error("search_job: geocoding err:", err);
+    //       done(err);
+    //     });
+    // },
     (done) => {
       let values = [search_lat, search_lat, search_long, search_long];
       let sql = "SELECT job.*, company.* , industry.*, job_role.*, job_type.*, job_skill.*, job_schedule.*, skill_type.* " +
@@ -176,13 +197,13 @@ function search_job(req, res) {
                   "JOIN job_type USING(job_type_id) " +
                   "LEFT JOIN job_schedule USING(job_schedule_id) " +
                   "LEFT JOIN job_skill ON job_skill.job_id = job.job_id " +
-                  "LEFT JOIN skill_type ON job_skill.skill_type_id = skill_type.skill_type_id " +
-                  "WHERE " +
-                  "(job.is_deleted = 0 OR job.is_deleted IS NULL) AND " +
-                  "job.latitude_lower_"  + search_radius_label + " <= ? AND " +
-                  "job.latitude_upper_"  + search_radius_label + " >= ? AND " +
-                  "job.longitude_lower_" + search_radius_label + " >= ? AND " +
-                  "job.longitude_upper_" + search_radius_label + " <= ?";
+                  "LEFT JOIN skill_type ON job_skill.skill_type_id = skill_type.skill_type_id LIMIT 50" 
+                  // "WHERE " +
+                  // "(job.is_deleted = 0 OR job.is_deleted IS NULL) AND " +
+                  // "job.latitude_lower_"  + search_radius_label + " <= ? AND " +
+                  // "job.latitude_upper_"  + search_radius_label + " >= ? AND " +
+                  // "job.longitude_lower_" + search_radius_label + " >= ? AND " +
+                  // "job.longitude_upper_" + search_radius_label + " <= ?";
 
       if(search_industry && (search_industry.length || search_industry >= 1)) {
         sql += " AND company.industry_id IN (?)";
