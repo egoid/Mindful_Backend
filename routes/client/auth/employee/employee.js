@@ -115,7 +115,7 @@ function update_employee(req, res) {
   const location_name = req.body.location_name || null;
   const UPDATABLE_COLS = [
     'school_id', 'transportation', 'tipi_score_id', 'headline', 'school_level',
-    'gpa', 'schedule_id'
+    'gpa', 'schedule_id', 'video_url'
   ];
 
   let search_formatted;

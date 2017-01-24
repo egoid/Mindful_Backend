@@ -1,4 +1,4 @@
-'use strict'
+'use strict';
 
 const narrative = {
   "E": {
@@ -44,14 +44,14 @@ const ipip_algorithm = module.exports = (ans) => {
   for (let key in num_arr) {
     ans[key] = 6 - ans[key];
   }
-  console.log(ans);
 
   const ipip_scores         = {};
   const trait_keys          = Object.keys(narrative);
   const trait_keys_iterator = trait_keys.entries();
 
   for (let item of trait_keys_iterator) {
-    ipip_scores[item[1]] = ans[item[0] + 1] + ans[item[0] + 6] + ans[item[0] + 11] + ans[item[0] + 16];
+    let indx = item[0], trait = item[1];
+    ipip_scores[trait] = ans[indx+1] + ans[indx+6] + ans[indx+11] + ans[indx+16];
   }
 
   const output = {};
@@ -70,4 +70,7 @@ const ipip_algorithm = module.exports = (ans) => {
 };
 
 //test data
-//ipip_algorithm({1: 3, 2: 1, 3: 3, 4: 2, 5: 1, 6: 2, 7: 1, 8: 5, 9: 5, 10: 5, 11: 3, 12: 4, 13: 4, 14: 4, 15: 5, 16: 4, 17: 5, 18: 1, 19: 5, 20: 3});
+//console.log('output:',ipip_algorithm({1: 3, 2: 1, 3: 3, 4: 2, 5: 1, 6: 2, 7: 1, 8: 5, 9: 5, 10: 5, 11: 3, 12: 4, 13: 4, 14: 4, 15: 5, 16: 4, 17: 5, 18: 1, 19: 5, 20: 3}));
+
+//output object to json to test python script
+//console.log(JSON.stringify({1: 3, 2: 1, 3: 3, 4: 2, 5: 1, 6: 2, 7: 1, 8: 5, 9: 5, 10: 5, 11: 3, 12: 4, 13: 4, 14: 4, 15: 5, 16: 4, 17: 5, 18: 1, 19: 5, 20: 3}));
