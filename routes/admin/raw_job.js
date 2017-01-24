@@ -9,6 +9,7 @@ exports.router = router;
 
 router.get('/1/raw_jobs/job_list/', get_job_list);
 router.get('/1/raw_jobs/live_list/', get_live_list);
+router.get('/1/raw_jobs/query/', query_database);
 router.put('/1/raw_jobs/job_list/', edit_job);
 
 router.get('/1/raw_jobs/role_list/', get_role_list);
@@ -20,10 +21,25 @@ router.get('/1/raw_jobs/schedule_list/', get_schedule_list);
 router.get('/1/raw_jobs/job_type_list/', get_job_type_list);
 // router.put('/1/raw_jobs/:id', update_job);
 
+function query_database(req, res) {
+  const values = [];
+  let sql = String(req.query.query).replace(/\>/g , ' ')
+  console.log(sql)
+
+  db.connectAndQuery({ sql, values }, (error, results) => {
+    if(error) {
+      console.error(error);
+      res.sendStatus(500);
+    } else {
+      res.status(200).send(results);
+    }
+  });
+}
+
 function get_job_list(req, res) {
   const category = req.query.job_category;
   const values = [];
-  let sql = "SELECT * from raw_jobs_2017" 
+  let sql = "select job_title, job_summ, company, job_loc, salary, job_desc, url, post_date, expiry_date, job_available, search_keyword, search_zip from raw_jobs_2017 group by job_desc"
   if(category){
     sql += ' WHERE `job_category`= ?';
     values.push(category);
