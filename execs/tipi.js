@@ -42,7 +42,7 @@ const ipip_algorithm = module.exports = (ans) => {
   //Reverse negative keyed items and calculate score for each trait.
 
   for (let key in num_arr) {
-    ans[key] = 6 - ans[key];
+    ans[num_arr[key]] = 6 - ans[num_arr[key]];
   }
 
   const ipip_scores         = {};
@@ -70,7 +70,6 @@ const ipip_algorithm = module.exports = (ans) => {
 };
 
 //test data
-//console.log('output:',ipip_algorithm({1: 3, 2: 1, 3: 3, 4: 2, 5: 1, 6: 2, 7: 1, 8: 5, 9: 5, 10: 5, 11: 3, 12: 4, 13: 4, 14: 4, 15: 5, 16: 4, 17: 5, 18: 1, 19: 5, 20: 3}));
-
+//console.log(ipip_algorithm([2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2]));
 //output object to json to test python script
 //console.log(JSON.stringify({1: 3, 2: 1, 3: 3, 4: 2, 5: 1, 6: 2, 7: 1, 8: 5, 9: 5, 10: 5, 11: 3, 12: 4, 13: 4, 14: 4, 15: 5, 16: 4, 17: 5, 18: 1, 19: 5, 20: 3}));
