@@ -170,7 +170,6 @@ function query_job(req,res) {
                         "UPPER(company.name) LIKE UPPER('" + String(req.query.query) + "') || " +
                         "UPPER(job_role.job_role_name) LIKE UPPER('" + String(req.query.query) + "') )"
       }
-      console.log(req.query.industry)
       if (req.query.industry) {
         sql += "WHERE ( job.industry_id LIKE '" + String(req.query.industry) + "')"
       }      
@@ -205,7 +204,14 @@ function get_joblist_length(req, res) {
   const category = req.query.job_category;
   const values = [];
   let sql = "SELECT count(*) FROM job "
-
+  if (req.query.query) {
+    sql += "WHERE ( UPPER(job.title) LIKE UPPER('" + String(req.query.query) + "') || " +
+                    "UPPER(company.name) LIKE UPPER('" + String(req.query.query) + "') || " +
+                    "UPPER(job_role.job_role_name) LIKE UPPER('" + String(req.query.query) + "') )"
+  };
+  if (req.query.industry) {
+    sql += "WHERE ( job.industry_id LIKE '" + String(req.query.industry) + "')"
+  };
   db.connectAndQuery({ sql, values }, (error, results) => {
     if(error) {
       console.error(error);
