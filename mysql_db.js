@@ -22,6 +22,8 @@ if(process.env.environment == 'prod') {
 const db_config = Object.assign(DEFAULT_DB_CONF, config.mysql_db_raw);
 const db_pool = mysql.createPool(db_config);
 
+
+
 function commit(connection, done) {
   queryWithConnection(connection, "COMMIT", [], (error) => {
     try {

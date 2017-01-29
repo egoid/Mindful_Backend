@@ -8,12 +8,13 @@ exports.router = router;
 router.get('/1/employer', get_employer);
 router.get('/1/employer/job', get_employer_jobs_by_employer);
 
+
 function get_employer(req, res) {
-  const sql = "SELECT employer.*, user.alias AS employee_name " +
+  const sql = "SELECT employer.*, user.email AS employee_name " +
               "FROM employer " +
               "JOIN user USING(user_id) " +
               "WHERE employer_id = ?";
-  const values = [req.user.employer_id];
+  const values = [1];
 
   db.connectAndQuery({sql, values}, (error, results) => {
     if(error) {
