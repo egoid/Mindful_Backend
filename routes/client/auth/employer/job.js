@@ -11,7 +11,9 @@ exports.router = router;
 router.post('/1/job', create_job);
 router.post('/1/job/:job_id', update_job);
 router.delete('/1/job/:job_id', delete_job);
-
+// job_schedule_id
+// employer_id
+// company_id
 function _extract_job_def(req) {
     return {
 	company_id: req.body.company_id,

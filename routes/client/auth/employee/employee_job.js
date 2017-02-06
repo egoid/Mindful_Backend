@@ -4,6 +4,7 @@ const express = require('express');
 const db = require('../../../../mysql_db_prod.js');
 const _ = require('lodash');
 const async = require('async');
+var distance = require('google-distance');
 const NodeGeocoder = require('node-geocoder');
 
 const router = new express.Router();
@@ -92,7 +93,6 @@ function get_more_jobs(req,res) {
       }
 
       db.connectAndQuery({sql, values, nestTables: true}, (error, results) => {
-        console.log(results)
         if(error) {
           console.error("search_job: sql err:", error);
         } else {
@@ -181,7 +181,6 @@ function query_job(req,res) {
       }
 
       db.connectAndQuery({sql, values, nestTables: true}, (error, results) => {
-        console.log(results)
         if(error) {
           console.error("search_job: sql err:", error);
         } else {
@@ -228,6 +227,7 @@ function search_job(req, res) {
   const search_industry = req.body.industry_id || req.query.industry_id;
   const search_job_type = req.body.job_type_id || req.query.job_type_id;
   let search_radius_label = req.body.radius || req.query.radius;
+
 
   let search_lat;
   let search_long;
@@ -277,12 +277,12 @@ function search_job(req, res) {
       }
 
       sql += " LIMIT " + String(req.query.page_number*25) + " OFFSET "  + String((req.query.page_number-1)*25)
-
+      console.log(sql)
       db.connectAndQuery({sql, values, nestTables: true}, (error, results) => {
         if(error) {
           console.error("search_job: sql err:", error);
         } else {
-          result = _make_job_from_results(results);
+          result = _make_job_from_results(results, search_location);
         }
         done(error);
       });
@@ -428,7 +428,8 @@ const LABEL_TO_RADIUS = {
   car: 8
 };
 
-function _make_job_from_results(results) {
+
+function _make_job_from_results(results, your_loc) {
   let result = [];
   let job_ids = {}
 
@@ -446,19 +447,21 @@ function _make_job_from_results(results) {
         company.property_bag = JSON.parse(company.property_bag);
 
         _.each(results, (r) => {
+
+
           if(r.job.job_id == r.job_skill.job_id) {
             const skill_def = _.pick(r.skill_type, SKILL_KEYS);
             skill_def.push(r.job_skill.job_skill_id)
             skills.push(skill_def);
           }
         });
-
         result.push({
           job: Object.assign({}, job, job_role, job_type),
           industry: a_result.industry,
           job_schedule: a_result.job_schedule,
           company,
           skills,
+          distance: distance ,
         });
       }
     });

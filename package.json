@@ -17,6 +17,7 @@
     "ejs": "1.x",
     "errorhandler": "*",
     "express": "4.x",
+    "google-distance": "^1.0.1",
     "image-size": "0.5.0",
     "lodash": "3.x",
     "method-override": "*",

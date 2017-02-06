@@ -19,8 +19,10 @@ const geocoder = NodeGeocoder(GOOGLE_GEO_CONFIG);
 
 
 router.get('/1/jobs', search_job);
+router.get('/1/jobs/job_list_length', get_joblist_length);
 router.get('/1/job/:job_id', get_job);
 router.get('/1/job_roles', get_job_roles);
+router.get('/1/employee/job/job_list', get_joblist_length );
 
 router.post('/1/jobs', search_job);
 
@@ -78,8 +80,6 @@ const LABEL_TO_RADIUS = {
 
 function _make_job_from_results(results) {
     
-    console.log('nothing');
-    console.log(results);
     
     let result = [];
     let job_ids = {}
@@ -117,7 +117,29 @@ function _make_job_from_results(results) {
     }
     
     return result;
-}
+};
+
+function get_joblist_length(req, res) {
+  const category = req.query.job_category;
+  const values = [];
+  let sql = "SELECT count(*) FROM job "
+  if (req.query.query) {
+    sql += "WHERE ( UPPER(job.title) LIKE UPPER('" + String(req.query.query) + "') || " +
+                    "UPPER(company.name) LIKE UPPER('" + String(req.query.query) + "') || " +
+                    "UPPER(job_role.job_role_name) LIKE UPPER('" + String(req.query.query) + "') )"
+  };
+  if (req.query.industry) {
+    sql += "WHERE ( job.industry_id LIKE '" + String(req.query.industry) + "')"
+  };
+  db.connectAndQuery({ sql, values }, (error, results) => {
+    if(error) {
+      console.error(error);
+      res.sendStatus(500);
+    } else {
+      res.status(200).send(results);
+    }
+  });
+};
 
 function get_job(req, res) {
     const sql = "SELECT job.*, company.* , industry.*, job_role.*, job_type.*, job_skill.*, job_schedule.*, skill_type.* " +
@@ -143,7 +165,6 @@ function get_job(req, res) {
     });
 }
 function search_job(req, res) {
-    
     
     const search_location = req.body.location || req.query.location;
     const search_string = req.body.search || req.query.search;
@@ -184,13 +205,13 @@ function search_job(req, res) {
 		    "JOIN job_type USING(job_type_id) " +
 		    "LEFT JOIN job_schedule USING(job_schedule_id) " +
 		    "LEFT JOIN job_skill ON job_skill.job_id = job.job_id " +
-		    "LEFT JOIN skill_type ON job_skill.skill_type_id = skill_type.skill_type_id " +
-		    "WHERE " +
-		    "(job.is_deleted = 0 OR job.is_deleted IS NULL) AND " +
-		    "job.latitude_lower_" + search_radius_label + " <= ? AND " +
-		    "job.latitude_upper_" + search_radius_label + " >= ? AND " +
-		    "job.longitude_lower_" + search_radius_label + " >= ? AND " +
-		    "job.longitude_upper_" + search_radius_label + " <= ?";
+		    "LEFT JOIN skill_type ON job_skill.skill_type_id = skill_type.skill_type_id "
+		    // "WHERE " +
+		    // "(job.is_deleted = 0 OR job.is_deleted IS NULL) AND " +
+		    // "job.latitude_lower_" + search_radius_label + " <= ? AND " +
+		    // "job.latitude_upper_" + search_radius_label + " >= ? AND " +
+		    // "job.longitude_lower_" + search_radius_label + " >= ? AND " +
+		    // "job.longitude_upper_" + search_radius_label + " <= ?";
 		
 		if (search_industry && (search_industry.length || search_industry >= 1)) {
 		    sql += " AND company.industry_id IN (?)";
@@ -204,7 +225,13 @@ function search_job(req, res) {
 		    sql += " AND job.job_type_id IN (?)";
 		    values.push(search_job_type);
 		}
-		
+      if (req.query.page_number > 1) {
+        sql += " LIMIT " + String(req.query.page_number*25) + " OFFSET "  + String((req.query.page_number-1)*25)
+      } 
+      if(req.query.page_number) {
+        sql += " LIMIT " + String(req.query.page_number*25) 
+      }
+
 		db.connectAndQuery({sql, values, nestTables: true}, (error, results) => {
 		    if (error) {
 			console.error("search_job: sql err:", error);
@@ -238,4 +265,25 @@ function get_job_roles(req, res) {
 	    res.status(200).send(job_roles);
 	}
     });
+}
+function get_joblist_length(req, res) {
+  const category = req.query.job_category;
+  const values = [];
+  let sql = "SELECT count(*) FROM job "
+  if (req.query.query) {
+    sql += "WHERE ( UPPER(job.title) LIKE UPPER('" + String(req.query.query) + "') || " +
+                    "UPPER(company.name) LIKE UPPER('" + String(req.query.query) + "') || " +
+                    "UPPER(job_role.job_role_name) LIKE UPPER('" + String(req.query.query) + "') )"
+  };
+  if (req.query.industry) {
+    sql += "WHERE ( job.industry_id LIKE '" + String(req.query.industry) + "')"
+  };
+  db.connectAndQuery({ sql, values }, (error, results) => {
+    if(error) {
+      console.error(error);
+      res.sendStatus(500);
+    } else {
+      res.status(200).send(results);
+    }
+  });
 }
