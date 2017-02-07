@@ -4,22 +4,29 @@ const _ = require('lodash');
 const async = require('async');
 const express = require('express');
 const db = require('../../../../mysql_db_prod.js');
+const NodeGeocoder = require('node-geocoder');
 
+const GOOGLE_GEO_CONFIG = {
+    apiKey: 'AIzaSyAJwf4JXpI9MRGuZdYcOFT9-nq5lzbuPKI',
+    formatter: null,
+    httpAdapter: 'https',
+    provider: 'google',
+};
+const geocoder = NodeGeocoder(GOOGLE_GEO_CONFIG);
 const router = new express.Router();
 exports.router = router;
 
 router.post('/1/job', create_job);
 router.post('/1/job/:job_id', update_job);
 router.delete('/1/job/:job_id', delete_job);
-// job_schedule_id
-// employer_id
-// company_id
+
 function _extract_job_def(req) {
     return {
 	company_id: req.body.company_id,
 	job_role_id: req.body.job_role_id,
 	job_type_id: req.body.job_type_id,
 	employer_id: req.user.employer_id,
+	industry_id: 1,
 	title: req.body.title,
 	location: req.body.location || null,
 	pay_rate_min: req.body.pay_rate_min || null,
@@ -34,10 +41,10 @@ function _extract_job_def(req) {
 }
 
 function create_job(req, res) {
-    if (!req.user.employer_id) {
-	res.sendStatus(400);
-	return;
-    }
+ //    if (!req.user.employer_id) {
+	// res.sendStatus(400);
+	// return;
+ //    }
     
     const job_values = _extract_job_def(req);
     
@@ -82,10 +89,7 @@ function create_job(req, res) {
 		}
 	    },
 	    (done) => {
-		_.each(Object.keys(LABEL_TO_RADIUS), (label) => {
-		    const radius = LABEL_TO_RADIUS[label];
-		    radius_coordinates[label] = _radius_lat_long_calc(latitude, longitude, radius);
-		});
+
 		done();
 	    },
 	    (done) => {
@@ -134,7 +138,7 @@ function create_job(req, res) {
 		res.status(200).send(result);
 	    }
 	});
-}
+}	
 function update_job(req, res) {
     const job_values = _extract_job_def(req);
     const job_id = req.params.job_id;

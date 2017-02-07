@@ -23,6 +23,8 @@ function login(req, res) {
   let db_pass;
   let session_key;
 
+  console.log(email)
+  console.log(password)
   async.series([
     (done) => {
       const sql = "SELECT user_id, password FROM user WHERE email = ?";

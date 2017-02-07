@@ -40,9 +40,8 @@ function create_company(req, res) {
     },
     (done) => {
       if(!company_id) {
-        const sql = "INSERT INTO company (name, industry_id, email_domain, property_bag) VALUES (?,?,?,?)";
+        const sql = "INSERT INTO company (name, email_domain, property_bag) VALUES (?,?,?)";
         const values = [company_def.name,
-                        company_def.industry_id,
                         company_def.email_domain,
                         JSON.stringify(company_def.property_bag)];
 
