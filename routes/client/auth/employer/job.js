@@ -25,7 +25,7 @@ function _extract_job_def(req) {
 	company_id: req.body.company_id,
 	job_role_id: req.body.job_role_id,
 	job_type_id: req.body.job_type_id,
-	employer_id: req.user.employer_id,
+	employer_id: req.body.employer_id,
 	industry_id: 1,
 	title: req.body.title,
 	location: req.body.location || null,

@@ -194,6 +194,7 @@ function query_job(req,res) {
     if(error) {
       res.sendStatus(500);
     } else {
+      console.log(result)
       res.status(200).send(result);
     }
   });
@@ -277,7 +278,6 @@ function search_job(req, res) {
       }
 
       sql += " LIMIT " + String(req.query.page_number*25) + " OFFSET "  + String((req.query.page_number-1)*25)
-      console.log(sql)
       db.connectAndQuery({sql, values, nestTables: true}, (error, results) => {
         if(error) {
           console.error("search_job: sql err:", error);

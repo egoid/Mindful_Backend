@@ -19,6 +19,7 @@ const geocoder = NodeGeocoder(GOOGLE_GEO_CONFIG);
 
 
 router.get('/1/jobs', search_job);
+router.get('/1/job_by_employer', employer_job);
 router.get('/1/jobs/job_list_length', get_joblist_length);
 router.get('/1/job/:job_id', get_job);
 router.get('/1/job_roles', get_job_roles);
@@ -170,6 +171,7 @@ function search_job(req, res) {
     const search_string = req.body.search || req.query.search;
     const search_industry = req.body.industry_id || req.query.industry_id;
     const search_job_type = req.body.job_type_id || req.query.job_type_id;
+    const search_employer_id = req.body.employer_id || req.query.employer_id;
     
     let search_radius_label = req.body.radius || req.query.radius;
     let search_lat;
@@ -212,7 +214,9 @@ function search_job(req, res) {
 		    // "job.latitude_upper_" + search_radius_label + " >= ? AND " +
 		    // "job.longitude_lower_" + search_radius_label + " >= ? AND " +
 		    // "job.longitude_upper_" + search_radius_label + " <= ?";
-		
+    if (search_employer_id) {
+        sql += " WHERE job.employer_id = " + String(search_employer_id);
+    };
 		if (search_industry && (search_industry.length || search_industry >= 1)) {
 		    sql += " AND company.industry_id IN (?)";
 		    values.push(search_industry);
@@ -249,6 +253,42 @@ function search_job(req, res) {
 		res.status(200).send(result);
 	    }
 	});
+};
+function employer_job(req, res) {
+    let search_employer_id = req.query.q/16;
+    let values = [];
+    let result = [];
+    async.series([
+      (done) => {
+    let sql = "SELECT job.*, company.* , industry.*, job_role.*, job_type.*, job_skill.*, job_schedule.*, skill_type.* " +
+        "FROM job " +
+        "JOIN company USING(company_id) " +
+        "JOIN industry USING(industry_id) " +
+        "JOIN job_role USING(job_role_id) " +
+        "JOIN job_type USING(job_type_id) " +
+        "LEFT JOIN job_schedule USING(job_schedule_id) " +
+        "LEFT JOIN job_skill ON job_skill.job_id = job.job_id " +
+        "LEFT JOIN skill_type ON job_skill.skill_type_id = skill_type.skill_type_id " +
+        "WHERE job.employer_id = " + String(search_employer_id)
+
+
+    db.connectAndQuery({sql, values, nestTables: true}, (error, results) => {
+        if (error) {
+            console.error("search_job: sql err:", error);
+        } else {
+          result = ( _make_job_from_results(results) );
+        }
+        done(error);
+    });
+      },
+  ],
+  (error) => {
+      if (error) {
+    res.sendStatus(500);
+      } else {
+    res.status(200).send(result);
+      }
+  });
 }
 function get_job_roles(req, res) {
     const sql = "SELECT * FROM job_role";
