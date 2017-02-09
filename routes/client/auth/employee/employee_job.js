@@ -69,6 +69,7 @@ function get_more_jobs(req,res) {
                   "LEFT JOIN job_schedule USING(job_schedule_id) " +
                   "LEFT JOIN job_skill ON job_skill.job_id = job.job_id " +
                   "LEFT JOIN skill_type ON job_skill.skill_type_id = skill_type.skill_type_id "
+                  "WHERE job.is_deleted = 0 "
 
       if(search_industry && (search_industry.length || search_industry >= 1)) {
         sql += " AND company.industry_id IN (?) ";
@@ -153,6 +154,7 @@ function query_job(req,res) {
                   "LEFT JOIN job_skill ON job_skill.job_id = job.job_id " +
                   "LEFT JOIN skill_type ON job_skill.skill_type_id = skill_type.skill_type_id "
 
+      sql += "WHERE job.is_deleted = 0 "
       if(search_industry && (search_industry.length || search_industry >= 1)) {
         sql += " AND company.industry_id IN (?) ";
         values.push(search_industry);
@@ -166,12 +168,12 @@ function query_job(req,res) {
         values.push(search_job_type);
       }
       if (req.query.query) {
-        sql += "WHERE ( UPPER(job.title) LIKE UPPER('" + String(req.query.query) + "') || " +
+        sql += "AND ( UPPER(job.title) LIKE UPPER('" + String(req.query.query) + "') || " +
                         "UPPER(company.name) LIKE UPPER('" + String(req.query.query) + "') || " +
-                        "UPPER(job_role.job_role_name) LIKE UPPER('" + String(req.query.query) + "') )"
+                        "UPPER(job_role.job_role_name) LIKE UPPER('" + String(req.query.query) + "') ) "
       }
       if (req.query.industry) {
-        sql += "WHERE ( job.industry_id LIKE '" + String(req.query.industry) + "')"
+        sql += "AND ( job.industry_id LIKE '" + String(req.query.industry) + "') "
       }      
       if (req.query.page_number > 1) {
         sql += " LIMIT " + String(req.query.page_number*25) + " OFFSET "  + String((req.query.page_number-1)*25)
@@ -194,7 +196,6 @@ function query_job(req,res) {
     if(error) {
       res.sendStatus(500);
     } else {
-      console.log(result)
       res.status(200).send(result);
     }
   });
@@ -204,13 +205,14 @@ function get_joblist_length(req, res) {
   const category = req.query.job_category;
   const values = [];
   let sql = "SELECT count(*) FROM job "
+  sql += "WHERE job.is_deleted = 0 "
   if (req.query.query) {
-    sql += "WHERE ( UPPER(job.title) LIKE UPPER('" + String(req.query.query) + "') || " +
+    sql += "AND ( UPPER(job.title) LIKE UPPER('" + String(req.query.query) + "') || " +
                     "UPPER(company.name) LIKE UPPER('" + String(req.query.query) + "') || " +
                     "UPPER(job_role.job_role_name) LIKE UPPER('" + String(req.query.query) + "') )"
   };
   if (req.query.industry) {
-    sql += "WHERE ( job.industry_id LIKE '" + String(req.query.industry) + "')"
+    sql += "AND ( job.industry_id LIKE '" + String(req.query.industry) + "')"
   };
   db.connectAndQuery({ sql, values }, (error, results) => {
     if(error) {
@@ -262,7 +264,8 @@ function search_job(req, res) {
                   "JOIN job_type USING(job_type_id) " +
                   "LEFT JOIN job_schedule USING(job_schedule_id) " +
                   "LEFT JOIN job_skill ON job_skill.job_id = job.job_id " +
-                  "LEFT JOIN skill_type ON job_skill.skill_type_id = skill_type.skill_type_id "
+                  "LEFT JOIN skill_type ON job_skill.skill_type_id = skill_type.skill_type_id " +
+                  "WHERE job.is_deleted = 0 " 
 
       // if(search_industry && (search_industry.length || search_industry >= 1)) {
       //   sql += " AND company.industry_id IN (?) ";

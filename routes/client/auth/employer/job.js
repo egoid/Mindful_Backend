@@ -34,9 +34,10 @@ function _extract_job_def(req) {
 	min_gpa: req.body.min_gpa || null,
 	description: req.body.description || null,
 	external_url: req.body.external_url || null,
-	posted_at: req.body.posted_at || null,
+	posted_at: req.body.posted_at || new Date().toISOString().slice(0,10) ,
 	takedown_at: req.body.takedown_at || null,
-	job_schedule_id: req.body.job_schedule_id || null
+	job_schedule_id: req.body.job_schedule_id || null,
+	is_deleted : req.body.is_deleted || 0
     };
 }
 
@@ -142,12 +143,12 @@ function create_job(req, res) {
 function update_job(req, res) {
     const job_values = _extract_job_def(req);
     const job_id = req.params.job_id;
-    
     if (!job_values.company_id || !job_values.job_role_id || !job_values.job_type_id) {
 	res.status(400).send("When updating a job, company, job roles, and job types cannot be created.");
     } else {
 	const sql = "UPDATE job SET ? WHERE job_id = ? AND employer_id = ?";
-	db.connectAndQuery({sql, values: [job_values, job_id, req.user.employer_id]}, (error, results) => {
+	console.log(job_values)
+	db.connectAndQuery({sql, values: [job_values, job_id, job_values.employer_id]}, (error, results) => {
 	    if (error) {
 		console.error("update_job: sql err:", error);
 		res.sendStatus(500);

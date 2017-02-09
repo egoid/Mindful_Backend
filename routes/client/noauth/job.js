@@ -124,13 +124,14 @@ function get_joblist_length(req, res) {
   const category = req.query.job_category;
   const values = [];
   let sql = "SELECT count(*) FROM job "
+  sql += "WHERE is_deleted = 0 "
   if (req.query.query) {
-    sql += "WHERE ( UPPER(job.title) LIKE UPPER('" + String(req.query.query) + "') || " +
+    sql += "AND ( UPPER(job.title) LIKE UPPER('" + String(req.query.query) + "') || " +
                     "UPPER(company.name) LIKE UPPER('" + String(req.query.query) + "') || " +
                     "UPPER(job_role.job_role_name) LIKE UPPER('" + String(req.query.query) + "') )"
   };
   if (req.query.industry) {
-    sql += "WHERE ( job.industry_id LIKE '" + String(req.query.industry) + "')"
+    sql +=  "AND ( job.industry_id LIKE '" + String(req.query.industry) + "')"
   };
   db.connectAndQuery({ sql, values }, (error, results) => {
     if(error) {
