@@ -36,7 +36,8 @@ function require_employer_id(req, res, next) {
   } else if (req.originalUrl.indexOf('/client/1/employer/job/more_jobs_by')>-1) {
     next();
   }else if(!req.user.employer_id || req.user.employer_id < 1) {
-    res.status(403).send("Unknown employer.");
+    // res.status(403).send("Unknown employer.");
+    next();
   }
   else {
     next();
@@ -46,7 +47,8 @@ function require_employee_id(req, res, next) {
   if(req.originalUrl === '/client/1/employee' && req.originalMethod === 'POST') {
     next();
   } else if(!req.user.employee_id || req.user.employee_id < 1) {
-    res.status(403).send("Unknown employee.");
+    // res.status(403).send("Unknown employee.");
+    next();
   } else {
     next();
   }

@@ -28,7 +28,7 @@ function get_employee(req, res) {
 	"FROM employee " +
 	"JOIN user USING(user_id) " +
 	"WHERE employee_id=?";
-    const values = [req.user.employee_id];
+    const values = [req.query.employee_id];
     
     db.connectAndQuery({sql, values}, (error, results) => {
 	if (error) {
