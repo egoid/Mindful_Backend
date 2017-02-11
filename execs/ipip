@@ -36,9 +36,12 @@ narrative_json = """
 
 def calc_ipip_score(ans):
     """Reverse negative keyed items and calculate score for each trait."""
-
+    print(ans)
     for key in [6, 7, 8, 9, 10, 15, 16, 17, 18, 19, 20]:
         ans[key] = 6 - ans[key]
+
+    print("__")
+    print(ans)
 
     ipip_scores = {}
     for indx, trait in enumerate(["E","A","C","N","I"]):

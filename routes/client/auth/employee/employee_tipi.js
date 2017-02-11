@@ -138,6 +138,8 @@ function tipi_quiz(req, res) {
   const answers = req.body;
   const output = tipi(answers);
 
+  console.log(output)
+
   const tipi_values = {
     extraversion: output.E ? output.E.score : 0,
     agreeableness: output.A ? output.A.score : 0,
@@ -145,6 +147,8 @@ function tipi_quiz(req, res) {
     emotional_stability: output.N ? output.N.score : 0,
     openness_to_experiences: output.I ? output.I.score : 0
   };
+
+  console.log(tipi_values)
 
   let tipi_score_id;
   let connection;
