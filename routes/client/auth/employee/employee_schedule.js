@@ -16,13 +16,14 @@ router.delete('/1/employee/schedule/:employee_sched_id', delete_employee_sched);
 
 function get_employee_sched(req, res) {
   const sql = "SELECT * FROM employee_schedule WHERE employee_id = ?";
-  const values = [req.user.employee_id];
+  const values = [(req.user.employee_id || req.query.employee_id)];
   db.connectAndQuery({sql, values}, (error, results) => {
     if(error) {
       console.error("get_employee_sched: sql err:", error);
       res.sendStatus(500);
     } else if(results.length < 1) {
-      res.sendStatus(404);
+      // res.sendStatus(404);
+      res.status(200).send([]);
     } else {
       res.status(200).send(results);
     }

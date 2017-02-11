@@ -22,7 +22,8 @@ function get_employee_industry(req, res) {
       console.error("get_employee_industry: sql err:", error);
       res.sendStatus(500);
     } else if(results.length < 1) {
-      res.sendStatus(404);
+      // res.sendStatus(404);
+      res.status(200).send([]);
     } else {
       res.status(200).send(results);
     }

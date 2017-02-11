@@ -12,13 +12,14 @@ router.delete('/1/employee/experience/:experience_id', delete_employee_experienc
 
 function get_employee_experience(req, res) {
   const sql = "SELECT * FROM employee_experience WHERE employee_id = ?";
-  const values = [req.query.employee_id];
+  const values = [(req.body.employee_id || req.query.employee_id )];
   db.connectAndQuery({sql, values}, (error, results) => {
     if(error) {
       console.error("get_employee_experience: sql err:", error);
       res.sendStatus(500);
     } else if(results.length < 1) {
-      res.sendStatus(404);
+      // res.sendStatus(404);
+      res.status(200).send([]);
     } else {
       res.status(200).send(results);
     }

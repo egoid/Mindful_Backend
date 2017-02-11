@@ -60,8 +60,8 @@ function get_employee_tipi(req, res) {
               "FROM tipi_score " +
               "JOIN employee USING(tipi_score_id) " +
               "WHERE employee.employee_id = ?";
-  const values = [req.user.employee_id];
-
+  const values = [req.user.employee_id || req.query.employee_id];
+  console.log(values)
   db.connectAndQuery({sql, values}, (error, results) => {
     if(error) {
       console.error("get_employee_tipi: sql err:", error);
@@ -108,7 +108,8 @@ function create_tipi(req, res) {
     (err) => {
       if(err == '404') {
         db.rollback();
-        res.sendStatus(404);
+        // res.sendStatus(404);
+        res.send([]);
       } else if(err) {
         db.rollback();
         res.sendStatus(500);
