@@ -8,6 +8,7 @@ const employee_job = require('./employee_job.js');
 const employee_schedule = require('./employee_schedule.js');
 const employee_skill = require('./employee_skill.js');
 const employee_tipi = require('./employee_tipi.js');
+const employee_tracker = require('./employee_tracker.js');
 
 exports.router = router;
 router.use(employee.router);
@@ -17,3 +18,4 @@ router.use(employee_job.router);
 router.use(employee_schedule.router);
 router.use(employee_skill.router);
 router.use(employee_tipi.router);
+router.use(employee_tracker.router);

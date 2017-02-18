@@ -24,10 +24,33 @@ router.get('/1/employee/job', search_job);
 router.get('/1/employee/job/search', query_job);
 router.get('/1/employee/job/more_jobs_by', get_more_jobs);
 router.get('/1/employee/job/job_list', get_joblist_length );
+router.get('/1/employee/applied_to/', get_job_applications );
 router.post('/1/employee/job', create_employee_job);
 
 router.delete('/1/employee/job/:employee_job_id', delete_employee_job);
 
+function get_job_applications(req, res) {
+    
+    const sql = "SELECT distinct applied_job_id, status " +
+  "FROM job_applications " +
+  "WHERE employee_id  = ?";
+    const values = [req.query.employee_id];
+    console.log(values)
+    
+    db.connectAndQuery({sql, values}, (err, results) => {
+      console.log(results)
+  if (err) {
+      console.error("get_job_applications: sql err:", err);
+      res.sendStatus(500);
+  } else if (results.length < 1) {
+      // res.sendStatus(404);
+      res.status(200).send([]);
+  } else {
+      res.status(200).send(results);
+  }
+    });
+    
+}
 function get_more_jobs(req,res) {
   const search_location = req.body.location || req.query.location;
   const search_string = req.body.search || req.query.search;

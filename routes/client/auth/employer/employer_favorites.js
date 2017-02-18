@@ -14,7 +14,7 @@ exports.router = router;
 router.get('/1/employer_favorites', get_employer_favorites);
 router.post('/1/employer_favorites', create_employer_favorites);
 router.post('/1/employer_favorites/:employer_favorite_id', update_employer_favorites);
-router.delete('/1/employer_favorites/:employer_favorite_id', delete_employer_favorites);
+router.delete('/1/employer_favorites/:id', delete_employer_favorites);
 
 
 
@@ -31,7 +31,7 @@ function _extract_employer_favorite_def(req) {
 	employer_favorite_id: req.body.employer_favorite_id,
 	employer_id: (req.user.employer_id) ? req.user.employer_id : req.body.employer_id,
 	employee_id: req.body.employee_id,
-	user_id: (req.user.user_id) ? req.user.user_id : req.body.user_id,
+	user_id: req.body.user_id,
 	is_applicant: req.body.is_applicant,
 	is_match: req.body.is_match
     };
@@ -49,12 +49,13 @@ function _extract_update_employer_favorite_def(req) {
 function get_employer_favorites(req, res) {
     
     const employer_id = req.query.employer_id;
-    const sql = "SELECT company_id, employer_favorite_id, employer_id, employee_id, user_id, is_applicant, is_match, date_added " +
+    const sql = "SELECT company_id, id, employer_favorite_id, employer_id, employee_id, user_id, is_applicant, is_match, date_added " +
 	"FROM employer_favorites " +
 	"WHERE employer_id  = ?";
     const values = [employer_id];
     
     db.connectAndQuery({sql, values}, (err, results) => {
+    	console.log(results)
 	if(err) {
 	    console.error("get_employer_favorites: sql err:", err);
 	    res.sendStatus(500);
@@ -156,8 +157,8 @@ function update_employer_favorites(req, res) {
     }
 }
 function delete_employer_favorites(req, res) {
-    const values = [req.params.employer_favorite_id, req.body.employer_id];
-    const sql = "DELETE FROM employer_favorites WHERE employer_favorite_id = ? AND employer_id = ?";
+    const values = [req.params.id];
+    const sql = "DELETE FROM employer_favorites WHERE id = ?";
     db.connectAndQuery({sql, values}, (error, results) => {
 	if (error) {
 	    console.error("delete_employer_favorites: sql err:", error);

@@ -28,9 +28,11 @@ function _extract_employer_message_def(req) {
 	job_application_id: req.body.job_application_id,
 	message: req.body.message,
 	message_status: req.body.message_status,
-	message_date: req.body.message_date,
+	message_date: req.body.message_date || new Date().toISOString().slice(0,24) ,
 	message_source: req.body.message_source, //Employer or Applicant Label (User ID)
-	request_interview_date: req.body.request_interview_date
+	request_interview_date: req.body.request_interview_date,
+	request_interview_date_2: req.body.request_interview_date_2,
+	request_interview_date_3: req.body.request_interview_date_3
     };
 }
 
@@ -57,7 +59,6 @@ function get_employer_messaging(req, res) {
 
 
 function create_employer_messaging(req, res) {
-    
     if (!req.body.from_source_id && !req.body.to_source_id) {
 	res.sendStatus(400);
 	return;
@@ -65,6 +66,7 @@ function create_employer_messaging(req, res) {
     
     const job_values = _extract_employer_message_def(req);
     let connection;
+    console.log(job_values)
     
     async.series([
 	    (done) => {

@@ -48,7 +48,7 @@ function _extract_update_applied_job_def(req) {
 function get_job_applications(req, res) {
     
     const employer_id = req.query.employer_id;
-    const sql = "SELECT company_id, applied_job_id, applied_job_type_id, employer_id, employee_id,status, reviewed_by_id, added_date " +
+    const sql = "SELECT company_id, applied_job_id, applied_job_type_id, employer_id, employee_id,status, reviewed_by_id, added_date, status " +
 	"FROM job_applications " +
 	"WHERE employer_id  = ?";
     const values = [employer_id];
@@ -136,12 +136,11 @@ function create_job_applications(req, res) {
 function update_job_applications(req, res) {
     const applied_job_values = _extract_update_applied_job_def(req);
     const applied_job_id = req.params.applied_job_id;
-    
     if (!applied_job_values.employer_id || !applied_job_id) {
 	res.status(400).send("When updating a job, company, job roles, and job types cannot be created.");
     } else {
-	const sql = "UPDATE job_applications SET ? WHERE applied_job_id = ? AND employer_id = ?";
-	db.connectAndQuery({sql, values: [applied_job_values, applied_job_id, req.body.employer_id]}, (error, results) => {
+	const sql = "UPDATE job_applications SET ? WHERE applied_job_id = ? AND employer_id = ? AND employee_id = ? ";
+	db.connectAndQuery({sql, values: [applied_job_values, applied_job_id, req.body.employer_id , req.body.employee_id ]}, (error, results) => {
 	    if (error) {
 		console.error("update_job_applications: sql err:", error);
 		res.sendStatus(500);

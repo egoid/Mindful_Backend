@@ -12,7 +12,7 @@ router.delete('/1/employee/skill/:employee_skill_id', delete_employee_skill);
 
 function get_employee_skill(req, res) {
   const sql = "SELECT * FROM employee_skill WHERE employee_id = ?";
-  const values = [req.user.employee_id];
+  const values = [req.query.employee_id || req.user.employee_id ];
   db.connectAndQuery({sql, values}, (error, results) => {
     if(error) {
       console.error("get_employee_skill: sql err:", error);
