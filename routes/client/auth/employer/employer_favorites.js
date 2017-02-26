@@ -60,7 +60,8 @@ function get_employer_favorites(req, res) {
 	    console.error("get_employer_favorites: sql err:", err);
 	    res.sendStatus(500);
 	} else if(results.length < 1) {
-	    res.sendStatus(404);
+	    // res.sendStatus(404);
+	    res.sendStatus([]);
 	} else {
 	    res.status(200).send(results);
 	}
