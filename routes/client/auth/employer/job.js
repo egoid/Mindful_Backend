@@ -18,6 +18,7 @@ exports.router = router;
 
 router.post('/1/job', create_job);
 router.post('/1/job/:job_id', update_job);
+router.post('/1/job_role/:job_role_id', update_job_role);
 router.delete('/1/job/:job_id', delete_job);
 
 function _extract_job_def(req) {
@@ -36,8 +37,16 @@ function _extract_job_def(req) {
 	external_url: req.body.external_url || null,
 	posted_at: req.body.posted_at || new Date().toISOString().slice(0,10) ,
 	takedown_at: req.body.takedown_at || null,
+	activities : req.body.activities || null,
 	job_schedule_id: req.body.job_schedule_id || null,
-	is_deleted : req.body.is_deleted || 0
+	is_deleted : req.body.is_deleted || 0 ,
+	hours : req.body.hours
+    };
+}
+function _extract_job_role_def(req) {
+    return {
+	job_role_name: req.body.job_role_name,
+	job_role_descr: req.body.job_role_descr,
     };
 }
 
@@ -142,7 +151,10 @@ function create_job(req, res) {
 }	
 function update_job(req, res) {
     const job_values = _extract_job_def(req);
-    const job_id = req.params.job_id;
+    const job_id = req.params.job_id;	
+
+    console.log(job_values)
+
     if (!job_values.company_id || !job_values.job_role_id || !job_values.job_type_id) {
 	res.status(400).send("When updating a job, company, job roles, and job types cannot be created.");
     } else {
@@ -161,6 +173,27 @@ function update_job(req, res) {
 	    }
 	});
     }
+}
+function update_job_role(req, res) {
+    const job_values = _extract_job_role_def(req);
+    const job_id = req.params.job_role_id;	
+
+    console.log(job_values)
+
+	const sql = "UPDATE job_role SET ? WHERE job_role_id = ? ";
+	console.log(job_values)
+	db.connectAndQuery({sql, values: [job_values, job_id]}, (error, results) => {
+	    if (error) {
+		console.error("update_job: sql err:", error);
+		res.sendStatus(500);
+	    } else {
+		if (results.affectedRows < 1) {
+		    res.sendStatus(404);
+		} else {
+		    res.status(200).send({id: job_id});
+		}
+	    }
+	});	
 }
 function delete_job(req, res) {
     const values = [req.params.job_id, req.user.employer_id];

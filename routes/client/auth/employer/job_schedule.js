@@ -2,6 +2,7 @@
 
 const _ = require('lodash');
 const express = require('express');
+const async = require('async');
 const db = require('../../../../mysql_db_prod.js');
 
 const router = new express.Router();
@@ -10,19 +11,21 @@ exports.router = router;
 router.post('/1/job_schedule', create_job_sched);
 router.post('/1/job_schedule/:job_sched_id', update_job_sched);
 router.delete('/1/job_schedule/:job_sched_id', delete_job_sched);
-
+const SKILL_KEYS = [
+  'job_skill_id',
+  'skill_type_id',
+  'skill_type_name',
+  'skill_type_desc'
+];
 function create_job_sched(req, res) {
     if (!req.body.schedule || req.body.schedule.length < 7) {
 	res.status(400).send('Seven day schedule required.');
-    } else if (!req.body.job_id) {
-	res.status(400).send('Job ID required.');
-    } else {
+    }  else {
 	let connection;
 	let schedule_id;
-	
-	const schedule = req.body.schedule;
-	const job_id = req.body.job_id;
-	
+	let job_id = req.body.job_id
+	const values = req.body.schedule;
+
 	async.series([
 		(done) => {
 		    db.getConnection((err, conn) => {
@@ -34,28 +37,19 @@ function create_job_sched(req, res) {
 		    });
 		},
 		(done) => {
-		    const sql = "INSERT INTO job_schedule " +
+		    const sql = " INSERT INTO job_schedule " +
 			"(sunday_schedule, monday_schedule, " +
 			" tuesday_schedule, wednesday_schedule, thursday_schedule, " +
-			" friday_schedule, saturday_schedule) VALUES "
-		    "(?,?,?,?,?,?,?,?)";
-		    
-		    const values = [];
-		    _.each(schedule, (schedule_day) => {
-			if (SCHEDULE_VALUES.indexOf(schedule_day) < 0) {
-			    values.push("none");
-			} else {
-			    values.push(schedule_day);
-			}
-		    });
-		    
+			" friday_schedule, saturday_schedule) VALUES " +	
+		   " (?,?,?,?,?,?,?)";
+
 		    db.queryWithConnection(connection, sql, values, (err, results) => {
 			if (err) {
-			    consle.error("create_job: sql err:", err);
+			    console.error("create_job: sql err:", err);
 			} else {
 			    schedule_id = results.insertId;
 			}
-			done(error);
+			done(err);
 		    });
 		},
 		(done) => {
@@ -63,7 +57,7 @@ function create_job_sched(req, res) {
 		    const values = [schedule_id, job_id];
 		    db.queryWithConnection(connection, sql, values, (err, results) => {
 			if (err) {
-			    consle.error(err);
+			    console.error(err);
 			} else if (results.affectedRows < 1) {
 			    err = '404';
 			}

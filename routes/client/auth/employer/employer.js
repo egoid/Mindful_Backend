@@ -218,6 +218,7 @@ const JOB_KEYS = [
   'latitude',
   'longitude',
   'industry_id',
+  'hours',
 ];
 const COMPANY_KEYS = [
   'company_id',

@@ -92,6 +92,7 @@
 
 * post - '/1/job'
 * post - '/1/job/:job_id'
+* post - '/1/job_role/:job_id'
 * post - '/1/employer'
 * post - '/1/job_schedule'
 * post - '/1/job_schedule/:job_sched_id'
@@ -100,6 +101,7 @@
 * post - '/1/employer_favorites'
 * post - '/1/employer_favorites/:employer_favorite_id'
 * post - '/1/employer_messaging'
+
 
 
 * put - '/1/employer/:employer_id'

@@ -47,7 +47,8 @@ const JOB_KEYS = [
     'is_deleted',
     'location',
     'latitude',
-    'longitude'
+    'longitude',
+    'hours',
 ];
 const COMPANY_KEYS = [
     'company_id',
