@@ -102,7 +102,6 @@ function _make_job_from_results(results) {
 		_.each(results, (r) => {
 		    if (r.job.job_id == r.job_skill.job_id) {
 			var skill_def = _.pick(r.skill_type, SKILL_KEYS);
-      console.log(skill_def)
 			// skill_def.push(r.job_skill.job_skill_id)
 			// skills.push(skill_def);
 		    }
@@ -161,7 +160,7 @@ function get_job(req, res) {
 	    console.error("get_job: sql err:", error);
 	    res.sendStatus(500);
 	} else if (results.length < 1) {
-	    res.sendStatus(404);
+	    res.sendStatus([]);
 	} else {
 	    let result = _make_job_from_results(results);
 	    res.status(200).send(result[0]);

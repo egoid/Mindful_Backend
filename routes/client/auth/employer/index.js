@@ -22,4 +22,5 @@ router.use(job_schedule.router);
 router.use(job_applications.router);
 router.use(employer_favorites.router);
 router.use(employer_messaging.router);
+router.use(employer_tracker.router);
 router.use(employer_skill.router);

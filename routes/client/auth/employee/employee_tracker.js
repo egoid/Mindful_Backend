@@ -21,29 +21,28 @@ router.get('/1/employee_tracker', get_employee_tracker);
  */
 function get_employee_tracker(req, res) {
     
-    const employee_id = req.query.employee_id;
-    console.log(employee_id)
-    const sql = "(SELECT * FROM job_applications LEFT JOIN employee ON  job_applications.employee_id = employee.employee_id LEFT JOIN user ON  user.user_id = employee.user_id WHERE employee_id = ? and status = 'pass' ORDER BY first_name, last_name LIMIT 5) " +
+    const employee_id = req.query.employee_id;  
+    const sql = "(SELECT * FROM job_applications LEFT JOIN employee ON  job_applications.employee_id = employee.employee_id LEFT JOIN user ON  user.user_id = employee.user_id WHERE job_applications.employee_id = ? and job_applications.status = 'pass' ORDER BY first_name, last_name LIMIT 5) " +
   " UNION" +
-  " (SELECT * FROM job_applications LEFT JOIN employee ON  job_applications.employee_id = employee.employee_id LEFT JOIN user ON  user.user_id = employee.user_id WHERE employee_id = ? and status = 'favorited' ORDER BY first_name, last_name LIMIT 5) " +
+  " (SELECT * FROM job_applications LEFT JOIN employee ON  job_applications.employee_id = employee.employee_id LEFT JOIN user ON  user.user_id = employee.user_id WHERE job_applications.employee_id = ? and job_applications.status = 'favorited' ORDER BY first_name, last_name LIMIT 5) " +
   " UNION" +
-  " (SELECT * FROM job_applications LEFT JOIN employee ON  job_applications.employee_id = employee.employee_id LEFT JOIN user ON  user.user_id = employee.user_id WHERE employee_id = ? and status = 'contacted' ORDER BY first_name, last_name LIMIT 5) " +
+  " (SELECT * FROM job_applications LEFT JOIN employee ON  job_applications.employee_id = employee.employee_id LEFT JOIN user ON  user.user_id = employee.user_id WHERE job_applications.employee_id = ? and job_applications.status = 'contacted' ORDER BY first_name, last_name LIMIT 5) " +
   " UNION" +
-  " (SELECT * FROM job_applications LEFT JOIN employee ON  job_applications.employee_id = employee.employee_id LEFT JOIN user ON  user.user_id = employee.user_id WHERE employee_id = ? and status = 'contacted_interview_one' ORDER BY first_name, last_name LIMIT 5) " +
+  " (SELECT * FROM job_applications LEFT JOIN employee ON  job_applications.employee_id = employee.employee_id LEFT JOIN user ON  user.user_id = employee.user_id WHERE job_applications.employee_id = ? and job_applications.status = 'contacted_interview_one' ORDER BY first_name, last_name LIMIT 5) " +
   " UNION" +
-  " (SELECT * FROM job_applications LEFT JOIN employee ON  job_applications.employee_id = employee.employee_id LEFT JOIN user ON  user.user_id = employee.user_id WHERE employee_id = ? and status = 'contacted_interview_two' ORDER BY first_name, last_name LIMIT 5) " +
+  " (SELECT * FROM job_applications LEFT JOIN employee ON  job_applications.employee_id = employee.employee_id LEFT JOIN user ON  user.user_id = employee.user_id WHERE job_applications.employee_id = ? and job_applications.status = 'contacted_interview_two' ORDER BY first_name, last_name LIMIT 5) " +
   " UNION" +    
-  " (SELECT * FROM job_applications LEFT JOIN employee ON  job_applications.employee_id = employee.employee_id LEFT JOIN user ON  user.user_id = employee.user_id WHERE employee_id = ? and status = 'interviewed' ORDER BY first_name, last_name LIMIT 5) " +
+  " (SELECT * FROM job_applications LEFT JOIN employee ON  job_applications.employee_id = employee.employee_id LEFT JOIN user ON  user.user_id = employee.user_id WHERE job_applications.employee_id = ? and job_applications.status = 'interviewed' ORDER BY first_name, last_name LIMIT 5) " +
   " UNION" +
-  " (SELECT * FROM job_applications LEFT JOIN employee ON  job_applications.employee_id = employee.employee_id LEFT JOIN user ON  user.user_id = employee.user_id WHERE employee_id = ? and status = 'background_check' ORDER BY first_name, last_name LIMIT 5) " +
+  " (SELECT * FROM job_applications LEFT JOIN employee ON  job_applications.employee_id = employee.employee_id LEFT JOIN user ON  user.user_id = employee.user_id WHERE job_applications.employee_id = ? and job_applications.status = 'background_check' ORDER BY first_name, last_name LIMIT 5) " +
   " UNION" +  
-  " (SELECT * FROM job_applications LEFT JOIN employee ON  job_applications.employee_id = employee.employee_id LEFT JOIN user ON  user.user_id = employee.user_id WHERE employee_id = ? and status = 'makingoffer' ORDER BY first_name, last_name LIMIT 5) " +
+  " (SELECT * FROM job_applications LEFT JOIN employee ON  job_applications.employee_id = employee.employee_id LEFT JOIN user ON  user.user_id = employee.user_id WHERE job_applications.employee_id = ? and job_applications.status = 'makingoffer' ORDER BY first_name, last_name LIMIT 5) " +
   " UNION" +
-  " (SELECT * FROM job_applications LEFT JOIN employee ON  job_applications.employee_id = employee.employee_id LEFT JOIN user ON  user.user_id = employee.user_id WHERE employee_id = ? and status = 'hired' ORDER BY first_name, last_name LIMIT 5) " +
+  " (SELECT * FROM job_applications LEFT JOIN employee ON  job_applications.employee_id = employee.employee_id LEFT JOIN user ON  user.user_id = employee.user_id WHERE job_applications.employee_id = ? and job_applications.status = 'hired' ORDER BY first_name, last_name LIMIT 5) " +
   " UNION" +  
-  " (SELECT * FROM job_applications LEFT JOIN employee ON  job_applications.employee_id = employee.employee_id LEFT JOIN user ON  user.user_id = employee.user_id WHERE employee_id = ? and status = 'pending' ORDER BY first_name, last_name LIMIT 5) " +
+  " (SELECT * FROM job_applications LEFT JOIN employee ON  job_applications.employee_id = employee.employee_id LEFT JOIN user ON  user.user_id = employee.user_id WHERE job_applications.employee_id = ? and job_applications.status = 'pending' ORDER BY first_name, last_name LIMIT 5) " +
   " UNION" +
-  " (SELECT * FROM job_applications LEFT JOIN employee ON  job_applications.employee_id = employee.employee_id LEFT JOIN user ON  user.user_id = employee.user_id WHERE employee_id = ? and status = 'other' ORDER BY first_name, last_name LIMIT 5) ";
+  " (SELECT * FROM job_applications LEFT JOIN employee ON  job_applications.employee_id = employee.employee_id LEFT JOIN user ON  user.user_id = employee.user_id WHERE job_applications.employee_id = ? and job_applications.status = 'other' ORDER BY first_name, last_name LIMIT 5) ";
     const values = [employee_id, employee_id, employee_id, employee_id, employee_id, employee_id, employee_id, employee_id, employee_id, employee_id, employee_id];
     db.connectAndQuery({sql, values}, (err, results) => {
   if (err) {

@@ -153,7 +153,6 @@ function update_job(req, res) {
     const job_values = _extract_job_def(req);
     const job_id = req.params.job_id;	
 
-    console.log(job_values)
 
     if (!job_values.company_id || !job_values.job_role_id || !job_values.job_type_id) {
 	res.status(400).send("When updating a job, company, job roles, and job types cannot be created.");
@@ -178,10 +177,9 @@ function update_job_role(req, res) {
     const job_values = _extract_job_role_def(req);
     const job_id = req.params.job_role_id;	
 
-    console.log(job_values)
 
 	const sql = "UPDATE job_role SET ? WHERE job_role_id = ? ";
-	console.log(job_values)
+
 	db.connectAndQuery({sql, values: [job_values, job_id]}, (error, results) => {
 	    if (error) {
 		console.error("update_job: sql err:", error);

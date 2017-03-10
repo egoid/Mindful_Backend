@@ -35,10 +35,10 @@ function get_job_applications(req, res) {
   "FROM job_applications " +
   "WHERE employee_id  = ?";
     const values = [req.query.employee_id];
-    console.log(values)
+
     
     db.connectAndQuery({sql, values}, (err, results) => {
-      console.log(results)
+
   if (err) {
       console.error("get_job_applications: sql err:", err);
       res.sendStatus(500);
