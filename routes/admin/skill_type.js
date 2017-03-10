@@ -21,22 +21,22 @@ function create_skill_type(req, res) {
   const type = req.body.type;
 
   async.series([
-    (done) => {
-      const sql = "SELECT skill_type_id FROM skill_type WHERE skill_type_descr = ?";
-      const values = [type];
-      db.connectAndQuery({sql, values}, (error, results) => {
-        if(error) {
-          console.error("create_skill_type: sql err:", error);
-        } else if(results.length > 0) {
-          skill_type_id = results[0].skill_type_id;
-        }
-        done(error);
-      });
-    },
+    // (done) => {
+    //   const sql = "SELECT skill_type_id FROM skill_type WHERE skill_type_descr = ?";
+    //   const values = [type];
+    //   db.connectAndQuery({sql, values}, (error, results) => {
+    //     if(error) {
+    //       console.error("create_skill_type: sql err:", error);
+    //     } else if(results.length > 0) {
+    //       skill_type_id = results[0].skill_type_id;
+    //     }
+    //     done(error);
+    //   });
+    // },
     (done) => {
       if(!skill_type_id) {
-        const sql = "INSERT INTO skill_type (skill_type_name, skill_type_descr) VALUES (?,?)";
-        const values = [name, type];
+        const sql = "INSERT INTO skill_type (skill_type_name) VALUES (?)";
+        const values = [name];
         db.connectAndQuery({sql, values}, (error, results) => {
           if(error) {
             console.error("create_skill_type: sql err:", error);

@@ -8,6 +8,7 @@ const job_applications = require('./job_applications.js');
 const employer_favorites = require('./employer_favorites.js');
 const employer_messaging = require('./employer_messaging.js');
 const employer_tracker = require('./employer_tracker.js');
+const employer_skill = require('./employer_skill.js');
 
 exports.router = router;
 
@@ -21,4 +22,4 @@ router.use(job_schedule.router);
 router.use(job_applications.router);
 router.use(employer_favorites.router);
 router.use(employer_messaging.router);
-router.use(employer_tracker.router);
+router.use(employer_skill.router);

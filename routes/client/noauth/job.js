@@ -101,9 +101,10 @@ function _make_job_from_results(results) {
 		
 		_.each(results, (r) => {
 		    if (r.job.job_id == r.job_skill.job_id) {
-			const skill_def = _.pick(r.skill_type, SKILL_KEYS);
-			skill_def.push(r.job_skill.job_skill_id)
-			skills.push(skill_def);
+			var skill_def = _.pick(r.skill_type, SKILL_KEYS);
+      console.log(skill_def)
+			// skill_def.push(r.job_skill.job_skill_id)
+			// skills.push(skill_def);
 		    }
 		});
 		
@@ -152,7 +153,7 @@ function get_job(req, res) {
 	"JOIN job_role USING(job_role_id) " +
 	"JOIN job_type USING(job_type_id) " +
 	"LEFT JOIN job_schedule USING(job_schedule_id) " +
-	"LEFT JOIN job_skill ON job_skill.job_id = job.job_id " +
+	"LEFT JOIN job_skill USING(job_id) " +
 	"LEFT JOIN skill_type ON job_skill.skill_type_id = skill_type.skill_type_id " +
 	"WHERE job.job_id = ?";
     db.connectAndQuery({sql, values: [req.params.job_id], nestTables: true}, (error, results) => {
