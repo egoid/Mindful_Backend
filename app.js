@@ -50,7 +50,6 @@ function allow_cross_domain(req,res,next) {
     res.header("Access-Control-Allow-Headers",
       "Content-Type,Accept,X-Requested-With,X-HTTP-Method-Override,X-Yobs-API-Key,X-Yobs-User-Session-Key,X-Yobs-Admin-Session-Key");
     res.header("Access-Control-Max-Age","3600");
-    res.header("Access-Control-Allow-Origin","*");
   }
 
   if (req.method == 'OPTIONS') {

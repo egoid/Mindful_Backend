@@ -47,7 +47,7 @@ function get_employer_messaging(req, res) {
     db.connectAndQuery({sql, values}, (err, results) => {
 	if (err) {
 	    console.error("get_employer_messaging: sql err:", err);
-	    res.sendStatus(500);
+	    res.sendStatus(500);  
 	} else if (results.length < 1) {
 	    res.sendStatus(404);
 	} else {
