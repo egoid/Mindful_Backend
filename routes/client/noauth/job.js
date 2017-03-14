@@ -160,7 +160,7 @@ function get_job(req, res) {
 	    console.error("get_job: sql err:", error);
 	    res.sendStatus(500);
 	} else if (results.length < 1) {
-	    res.sendStatus([]);
+	    res.status(200).send([]);
 	} else {
 	    let result = _make_job_from_results(results);
 	    res.status(200).send(result[0]);
