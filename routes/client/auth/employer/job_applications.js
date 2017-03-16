@@ -152,7 +152,7 @@ function update_job_applications(req, res) {
 		}
 	    }
 	});
-    }
+ 	}   
 }
 function delete_job_applications(req, res) {
     const values = [req.params.applied_job_id, req.body.employer_id];

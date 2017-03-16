@@ -477,7 +477,7 @@ function _make_job_from_results(results, your_loc) {
 
           if(r.job.job_id == r.job_skill.job_id) {
             const skill_def = _.pick(r.skill_type, SKILL_KEYS);
-            skill_def.push(r.job_skill.job_skill_id)
+            // skill_def.push(r.job_skill.job_skill_id)
             skills.push(skill_def);
           }
         });

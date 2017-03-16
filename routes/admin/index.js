@@ -11,6 +11,7 @@ const shift_type = require('./shift_type.js');
 const skill_type = require('./skill_type.js');
 const user_role = require('./user_role.js');
 const user_type = require('./user_type.js');
+const video = require('./video.js');
 
 const router = new express.Router();
 
@@ -26,3 +27,4 @@ router.use(shift_type.router);
 router.use(skill_type.router);
 router.use(user_role.router);
 router.use(user_type.router);
+router.use(video.router);
