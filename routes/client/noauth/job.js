@@ -327,3 +327,46 @@ function get_joblist_length(req, res) {
     }
   });
 }
+
+
+
+function _make_job_from_results(results, your_loc) {
+  let result = [];
+  let job_ids = {}
+
+  if(results.length) {
+    _.each(results, (a_result) => {
+      if(!job_ids[a_result.job.job_id]) {
+        job_ids[a_result.job.job_id] = true;
+        let job      = _.pick(a_result.job, JOB_KEYS);
+        let job_role = _.pick(a_result.job_role, JOB_ROLE_KEYS);
+        let job_type = _.pick(a_result.job_type, JOB_TYPE_KEYS);
+        let company  = _.pick(a_result.company, COMPANY_KEYS);
+        let skills   = [];
+
+        company.property_bag = JSON.parse(company.property_bag);
+
+        _.each(results, (r) => {
+
+
+          if(r.job.job_id == r.job_skill.job_id) {
+            const skill_def = _.pick(r.skill_type, SKILL_KEYS);
+            // skill_def.push(r.job_skill.job_skill_id)
+            skills.push(skill_def);
+          }
+        });
+        result.push({
+          job: Object.assign({}, job, job_role, job_type),
+          industry: a_result.industry,
+          job_schedule: a_result.job_schedule,
+          company,
+          skills,
+
+        });
+      }
+    });
+  }
+
+  return result;
+
+}

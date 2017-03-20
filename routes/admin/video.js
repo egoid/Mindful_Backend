@@ -9,7 +9,7 @@ exports.router = router;
 router.get('/1/video/:employee_id', get_video);
 
 function get_video(req, res) {
-  const employee_id = req.params.job_id;
+  const employee_id = req.params.employee_id;
 
   const sql = "SELECT video_url FROM employee where employee_id = ? ";
   const values = [employee_id];

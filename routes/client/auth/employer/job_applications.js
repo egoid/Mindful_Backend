@@ -14,7 +14,7 @@ exports.router = router;
 router.get('/1/job_applications', get_job_applications);
 router.post('/1/job_applications', create_job_applications);
 router.post('/1/job_applications/:applied_job_id', update_job_applications);
-router.delete('/1/job_applications/:applied_job_id', delete_job_applications);
+router.delete('/1/job_applications/:applied_job_id/:employee_id', delete_job_applications);
 
 /**
  *
@@ -155,14 +155,12 @@ function update_job_applications(req, res) {
  	}   
 }
 function delete_job_applications(req, res) {
-    const values = [req.params.applied_job_id, req.body.employer_id];
-    const sql = "DELETE FROM job_applications WHERE applied_job_id = ? AND employer_id = ?";
+    const values = [req.params.applied_job_id, req.params.employee_id];
+    const sql = "DELETE FROM job_applications WHERE applied_job_id = ? AND employee_id = ?";
     db.connectAndQuery({sql, values}, (error, results) => {
 	if (error) {
 	    console.error("delete_job_applications: sql err:", error);
 	    res.sendStatus(500);
-	} else if (results.affectedRows < 1) {
-	    res.sendStatus(404);
 	} else {
 	    res.sendStatus(200);
 	}
