@@ -66,8 +66,6 @@ function get_employee_tipi(req, res) {
     if(error) {
       console.error("get_employee_tipi: sql err:", error);
       res.sendStatus(500);
-    } else if(results.length < 1) {
-      res.sendStatus(404);
     } else {
       res.status(200).send(results[0]);
     }
