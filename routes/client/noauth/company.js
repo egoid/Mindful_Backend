@@ -17,11 +17,11 @@ router.post('/1/company/logo/:company_id',   upload.single("file") , attach_logo
 router.post('/1/company/:company_id', edit_company);
 
 function get_image(req, res) {
-  res.sendFile('/Users/ta/Desktop/yobs/sprint_3_api/uploads/' + req.params.name)
+  res.sendFile(__dirname + '/home/adam/yobs-api/uploads/' + req.params.name)
 };
 
 function attach_logo(req, res) {
-  var file = __dirname + '/../../../uploads/' + req.files.file.name;
+  var file = __dirname + '/home/adam/yobs-api/uploads/' + req.files.file.name;
   fs.rename(req.files.file.path, file, function(err) {
     if (err) {
       console.log(err);
