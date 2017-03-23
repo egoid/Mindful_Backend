@@ -19,6 +19,7 @@ router.get('/1/raw_jobs/skill_list/', get_skill_list);
 router.get('/1/raw_jobs/employer_list/', get_employer_list);
 router.get('/1/raw_jobs/schedule_list/', get_schedule_list);
 router.get('/1/raw_jobs/job_type_list/', get_job_type_list);
+router.get('/1/raw_jobs/user_list/', get_user_list);
 // router.put('/1/raw_jobs/:id', update_job);
 
 function query_database(req, res) {
@@ -35,7 +36,29 @@ function query_database(req, res) {
     }
   });
 }
+function get_user_list(req,res) {
+  const category = req.query.job_category;
+  const values = [];
+  let sql = "SELECT * from user" 
+  if(category){
+    sql += ' WHERE `job_category`= ?';
+    values.push(category);
+  }
 
+  db.connectAndQuery({ sql, values }, (error, results) => {
+    if(error) {
+      console.error(error);
+      res.sendStatus(500);
+    } else {  
+      const sorted = [];
+      for(let i in results){
+        let r = results[i];
+        sorted.push(r);
+      }
+      res.status(200).send(sorted);
+    }
+  });
+};
 function get_job_list(req, res) {
   const category = req.query.job_category;
   const values = [];

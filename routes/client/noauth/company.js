@@ -3,13 +3,47 @@
 const _ = require('lodash');
 const express = require('express');
 const db = require('../../../mysql_db_prod.js');
+const multer  = require('multer');
+const upload = multer({ dest: 'uploads/' });
+const fs = require("fs");
 
 const router = new express.Router();
 exports.router = router;
 
 router.get('/1/company', get_companies);
 router.get('/1/company/:company_id', get_company);
+router.get('/1/company/img/:name', get_image);
+router.post('/1/company/logo/:company_id',   upload.single("file") , attach_logo);
 router.post('/1/company/:company_id', edit_company);
+
+function get_image(req, res) {
+  res.sendFile('/Users/ta/Desktop/yobs/sprint_3_api/uploads/' + req.params.name)
+};
+
+function attach_logo(req, res) {
+  var file = __dirname + '/../../../uploads/' + req.files.file.name;
+  fs.rename(req.files.file.path, file, function(err) {
+    if (err) {
+      console.log(err);
+      res.send(500);
+    } else {
+
+      const sql = "UPDATE company SET logo_url=? WHERE company_id=?";
+      const values = [req.files.file.name, req.params.company_id];
+      db.connectAndQuery({sql, values}, (error, results) => {
+        console.log(results)
+        if(error) {
+          console.error("update_shift_type: sql err:", error);
+        } else {
+          res.json({
+            message: 'File uploaded successfully',
+            filename: req.files.file.name ,
+          });
+        }
+      });
+    }
+  });
+};
 
 function get_company(req, res) {
   const company_id = req.params.company_id;

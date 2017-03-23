@@ -158,7 +158,6 @@ function update_job(req, res) {
 	res.status(400).send("When updating a job, company, job roles, and job types cannot be created.");
     } else {
 	const sql = "UPDATE job SET ? WHERE job_id = ? AND employer_id = ?";
-	console.log(job_values)
 	db.connectAndQuery({sql, values: [job_values, job_id, job_values.employer_id]}, (error, results) => {
 	    if (error) {
 		console.error("update_job: sql err:", error);

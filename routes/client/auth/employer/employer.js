@@ -74,7 +74,13 @@ function get_employer_jobs_by_employer(req, res) {
   });
 };
 
+//*******
+//*******
+//**
+//**
 //** imported from employee/job
+//**
+//**
 
 function get_more_jobs(req,res) {
   const search_location = req.body.location || req.query.location;
