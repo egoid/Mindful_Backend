@@ -1,15 +1,15 @@
 {
   "mysql_db_raw": {
-    "host": "db-yobs.ccdbcoc5fc3t.us-west-2.rds.amazonaws.com",
-    "user": "guest",
-    "password": "yobs2016",
-    "database": "yobs_tech_admin_tool_v2"
+    "host": "***",
+    "user": "***",
+    "password": "***",
+    "database": "***"
   },
   "mysql_db_prod": {
-    "host": "db-yobs.ccdbcoc5fc3t.us-west-2.rds.amazonaws.com",
-    "user": "guest",
-    "password": "yobs2016",
-    "database": "yobs_tech_admin_tool_v2"
+    "host": "***",
+    "user": "***",
+    "password": "***",
+    "database": "***"
   },
   "aws": {
     "accessKeyId": "",
