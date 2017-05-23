@@ -1,6 +1,6 @@
 Clarity v1.0 Backend Specs
 Adam T.
-5/2017
+6/2017
 
 All requests must include session_key except AUTH POST ROUTES
 
