@@ -1,15 +1,15 @@
 {
   "mysql_db_raw": {
-    "host": "***",
-    "user": "***",
-    "password": "***",
-    "database": "***"
+    "host": "clarity.cmgjkbltsx26.us-west-2.rds.amazonaws.com",
+    "user": "adam",
+    "password": "mind1111",
+    "database": "clarity"
   },
   "mysql_db_prod": {
-    "host": "***",
-    "user": "***",
-    "password": "***",
-    "database": "***"
+    "host": "clarity.cmgjkbltsx26.us-west-2.rds.amazonaws.com",
+    "user": "adam",
+    "password": "mind1111",
+    "database": "clarity"
   },
   "aws": {
     "accessKeyId": "",
