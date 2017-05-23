@@ -24,7 +24,7 @@
     "mime": "*",
     "moment-timezone": "*",
     "morgan": "*",
-    "multer": "^1.3.0",
+    "multer": "^1.3.0"
     "mysql": "*",
     "node-config-sets": "*",
     "node-geocoder": "*",

@@ -38,7 +38,9 @@ function quiz(req,res) {
     (done) => {
       const sql = "SELECT user_id FROM sessions WHERE session_key = ? ";
       const values = [session_key];
+      console.log(sql , values)
       db.queryWithConnection(connection, sql, values, (error, results) => {
+        console.log(results)
         if(error) {
           console.error('register error', error);
         } else if(results[0] && results[0].user_id) {
@@ -90,7 +92,8 @@ function quiz(req,res) {
 
     if(error == 'User already exists') {
       res.status(400).send(error);
-    } else if(error || !session_key) {
+    } else if(error) {
+      console.log(error)
       res.sendStatus(500);
     } else {
       res.status(200).send(result);
@@ -100,7 +103,7 @@ function quiz(req,res) {
 };
 
 function create_quiz(req,res) {
-  const session_key = req.body.session_key;
+  const session_key = req.body.session_key
   const title = req.body.title;
   const quiz = req.body.json;
   // const quiz_id

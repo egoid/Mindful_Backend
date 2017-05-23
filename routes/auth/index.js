@@ -97,7 +97,7 @@ function register(req, res) {
         if(error) {
           console.error("register: randomBytes err:", error);
         } else {
-          session_key = buffer.toString('base64');
+          session_key = buffer.toString('base64').replace('+','*');
         }
         done(error);
       });
@@ -107,7 +107,7 @@ function register(req, res) {
         if(error) {
           console.error("register: randomBytes err:", error);
         } else {
-          api_key = buffer.toString('base64');
+          api_key = buffer.toString('base64').replace('+','*');
         }
         done(error);
       });
@@ -241,7 +241,7 @@ function login(req, res) {
         if(error) {
           console.error("register: randomBytes err:", error);
         } else {
-          session_key = buffer.toString('base64');
+          session_key = buffer.toString('base64').replace('+','*');
         }
         done(error);
       });
@@ -251,7 +251,7 @@ function login(req, res) {
         if(error) {
           console.error("register: randomBytes err:", error);
         } else {
-          api_key = buffer.toString('base64');
+          api_key = buffer.toString('base64').replace('+','*');
         }
         done(error);
       });
